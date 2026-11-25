@@ -5,12 +5,50 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>RaccShells - Reverse Shell Generator</title>
   <style>
+      /* -- Operator console vocabulary --------------------------------------
+         Raccoon's Den embeds this page (go:embed) and serves it under
+         /tools/raccshells, same origin as its operator console. Until
+         2026-11-25 this page spoke none of the console's language: zero custom
+         properties, and its green was the wrong green -- the brand green is
+         #00ff88.
+
+         Names and values are the console's own (static/graph.gohtml :root). The
+         three --*-accent names are this page's own, for the green-tinted edges
+         and washed panels it has always had; all three derive from
+         --primary-rgb, so they follow the operator's accent instead of pinning
+         one hue.
+
+         WHAT IS DELIBERATELY STILL A LITERAL: 80 distinct colours, 110 uses in
+         this stylesheet, and the 35 in the script below. Those are a CATEGORY
+         palette -- shell families, risk levels, syntax highlighting -- each a
+         saturated hue paired with its own tinted dark (#1a1600 with the ambers,
+         #180010 with the magentas, #0a0a1a with the blues). Forcing them onto an
+         accent token would destroy the only thing they carry, which is which
+         category you are looking at. Raccoon's Den treats its own categorical
+         colours the same way: --smb and --falcon-red-rgb are page-owned there,
+         not shared vocabulary.
+         ---------------------------------------------------------------------- */
+      :root {
+        --bg:               #0a0a0f;
+        --bg-raised:        #111118;
+        --bg-panel:         #13131c;
+        --border:           rgba(255,255,255,0.06);
+        --border-accent:    rgba(var(--primary-rgb), 0.22);
+        --border-accent-hi: rgba(var(--primary-rgb), 0.38);
+        --surface-accent:   rgba(var(--primary-rgb), 0.06);
+        --text:             #e0e0e0;
+        --text-dim:         #8a8aa0;
+        --primary:          #00ff88;
+        --primary-rgb:      0, 255, 136;
+        --warning:          #ffaa00;
+        --mono:             'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Monaco', monospace;
+      }
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: 'Courier New', Consolas, 'Liberation Mono', monospace;
-      background-color: #0a0a0a;
-      color: #c0c0c0;
+      font-family: var(--mono);
+      background-color: var(--bg);
+      color: var(--text);
       padding: 30px 20px;
       min-height: 100vh;
       overflow-x: hidden;
@@ -23,7 +61,7 @@
       top: 0; left: 0; right: 0; bottom: 0;
       background: repeating-linear-gradient(
         0deg, transparent, transparent 2px,
-        rgba(0,255,0,0.012) 2px, rgba(0,255,0,0.012) 4px
+        rgba(var(--primary-rgb), 0.012) 2px, rgba(var(--primary-rgb), 0.012) 4px
       );
       pointer-events: none;
       z-index: 0;
@@ -41,7 +79,7 @@
       text-align: center;
       margin-bottom: 28px;
       padding-bottom: 20px;
-      border-bottom: 1px solid #1a3a1a;
+      border-bottom: 1px solid var(--border-accent);
     }
 
     .logo-img {
@@ -49,20 +87,20 @@
       width: auto;
       display: block;
       margin: 0 auto 12px;
-      filter: drop-shadow(0 0 14px rgba(0,255,0,0.4));
+      filter: drop-shadow(0 0 14px rgba(var(--primary-rgb), 0.4));
     }
 
-    .tagline { color: #555; font-size: 0.82em; letter-spacing: 2px; }
-    .tagline strong { color: #00ff00; }
+    .tagline { color: var(--text-dim); font-size: 0.82em; letter-spacing: 2px; }
+    .tagline strong { color: var(--primary); }
 
     /* ── CONFIG PANEL ── */
     .config-panel {
-      background: linear-gradient(180deg, #0d0d0d 0%, #111 100%);
-      border: 1px solid #1a3a1a;
+      background: linear-gradient(180deg, var(--bg-raised) 0%, var(--bg-panel) 100%);
+      border: 1px solid var(--border-accent);
       border-radius: 6px;
       padding: 20px;
       margin-bottom: 16px;
-      box-shadow: 0 0 20px rgba(0,255,0,0.05);
+      box-shadow: 0 0 20px rgba(var(--primary-rgb), 0.05);
     }
 
     .config-grid {
@@ -80,7 +118,7 @@
     .field label {
       display: block;
       font-size: 0.78em;
-      color: #666;
+      color: var(--text-dim);
       margin-bottom: 4px;
       letter-spacing: 1px;
     }
@@ -93,15 +131,15 @@
       line-height: 1.4;
     }
 
-    .prompt-green { color: #00ff00; }
+    .prompt-green { color: var(--primary); }
 
     input[type="text"], select {
       width: 100%;
       padding: 8px 10px;
-      background: #0a0a0a;
-      border: 1px solid #1a3a1a;
+      background: var(--bg);
+      border: 1px solid var(--border-accent);
       border-radius: 4px;
-      color: #c0ffc0;
+      color: var(--text);
       font-family: inherit;
       font-size: 0.92em;
       outline: none;
@@ -109,15 +147,15 @@
     }
 
     input[type="text"]:focus, select:focus {
-      border-color: #00cc00;
-      box-shadow: 0 0 6px rgba(0,255,0,0.2);
+      border-color: rgba(var(--primary-rgb), 0.8);
+      box-shadow: 0 0 6px rgba(var(--primary-rgb), 0.2);
     }
 
-    select option { background: #111; color: #c0ffc0; }
+    select option { background: var(--bg-panel); color: var(--text); }
 
     .listener-box {
       background: #050f05;
-      border: 1px solid #0d2a0d;
+      border: 1px solid var(--border-accent);
       border-radius: 4px;
       padding: 10px 14px;
       display: flex;
@@ -126,8 +164,8 @@
       gap: 10px;
     }
 
-    .listener-label { color: #555; font-size: 0.78em; letter-spacing: 1px; white-space: nowrap; }
-    .listener-cmd { color: #00ff00; font-size: 0.88em; flex: 1; word-break: break-all; }
+    .listener-label { color: var(--text-dim); font-size: 0.78em; letter-spacing: 1px; white-space: nowrap; }
+    .listener-cmd { color: var(--primary); font-size: 0.88em; flex: 1; word-break: break-all; }
 
     /* ── SEARCH ── */
     .search-row {
@@ -147,11 +185,11 @@
     }
 
     .tab-btn {
-      background: #0d0d0d;
-      border: 1px solid #1a3a1a;
+      background: var(--bg-raised);
+      border: 1px solid var(--border-accent);
       border-bottom: none;
       border-radius: 4px 4px 0 0;
-      color: #555;
+      color: var(--text-dim);
       cursor: pointer;
       font-family: inherit;
       font-size: 0.82em;
@@ -160,13 +198,13 @@
       transition: color 0.2s, background 0.2s;
     }
 
-    .tab-btn:hover { color: #aaa; }
-    .tab-btn.active { color: #00ff00; background: #0d1a0d; border-color: #1a5a1a; }
+    .tab-btn:hover { color: var(--text-dim); }
+    .tab-btn.active { color: var(--primary); background: var(--surface-accent); border-color: var(--border-accent-hi); }
 
     .tab-content {
       display: none;
-      background: #0d1a0d;
-      border: 1px solid #1a5a1a;
+      background: var(--surface-accent);
+      border: 1px solid var(--border-accent-hi);
       border-radius: 0 4px 4px 4px;
       padding: 14px;
     }
@@ -174,19 +212,19 @@
     .tab-content.active { display: block; }
 
     /* ── SHELL LIST ── */
-    .shell-count { color: #444; font-size: 0.78em; letter-spacing: 1px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
-    .shell-count span { color: #00cc00; }
+    .shell-count { color: var(--text-dim); font-size: 0.78em; letter-spacing: 1px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
+    .shell-count span { color: rgba(var(--primary-rgb), 0.8); }
 
     .shell-item {
-      background: #060f06;
-      border: 1px solid #1a3a1a;
+      background: var(--surface-accent);
+      border: 1px solid var(--border-accent);
       border-radius: 4px;
       margin-bottom: 8px;
       overflow: hidden;
       transition: border-color 0.2s;
     }
 
-    .shell-item:hover { border-color: #2a5a2a; }
+    .shell-item:hover { border-color: var(--border-accent-hi); }
 
     .shell-header {
       display: flex;
@@ -198,7 +236,7 @@
     }
 
     .shell-name {
-      color: #00cc00;
+      color: rgba(var(--primary-rgb), 0.8);
       font-size: 0.88em;
       font-weight: bold;
       flex: 1;
@@ -224,7 +262,7 @@
       background: transparent;
       border: 1px solid #1a4a1a;
       border-radius: 3px;
-      color: #555;
+      color: var(--text-dim);
       cursor: pointer;
       font-family: inherit;
       font-size: 0.75em;
@@ -233,8 +271,8 @@
       white-space: nowrap;
     }
 
-    .copy-btn:hover { background: #0a2a0a; border-color: #00cc00; color: #00cc00; }
-    .copy-btn.copied { border-color: #00ff00; color: #00ff00; background: #001a00; }
+    .copy-btn:hover { background: #0a2a0a; border-color: rgba(var(--primary-rgb), 0.8); color: rgba(var(--primary-rgb), 0.8); }
+    .copy-btn.copied { border-color: var(--primary); color: var(--primary); background: #001a00; }
 
     .shell-body {
       display: none;
@@ -244,8 +282,8 @@
     .shell-body.open { display: block; }
 
     .shell-body pre {
-      background: #030803;
-      border: 1px solid #0d2a0d;
+      background: var(--surface-accent);
+      border: 1px solid var(--border-accent);
       border-radius: 3px;
       padding: 10px;
       overflow-x: auto;
@@ -253,7 +291,7 @@
       word-break: break-all;
     }
 
-    .shell-body code { color: #a0f0a0; font-size: 0.85em; }
+    .shell-body code { color: var(--text); font-size: 0.85em; }
 
     /* ── HELP MODAL ── */
     .tab-help-btn {
@@ -263,8 +301,8 @@
       line-height: 20px;
       text-align: center;
       border-radius: 50%;
-      border: 1px solid #2a5a2a;
-      color: #2a5a2a;
+      border: 1px solid var(--border-accent-hi);
+      color: var(--border-accent-hi);
       font-size: 0.85em;
       font-weight: bold;
       margin-left: 5px;
@@ -272,9 +310,9 @@
       vertical-align: middle;
       transition: all 0.15s;
     }
-    .tab-help-btn:hover { border-color: #00cc00; color: #00cc00; }
-    .tab-btn.active .tab-help-btn { border-color: #00aa00; color: #00aa00; }
-    .tab-btn.active .tab-help-btn:hover { border-color: #00ff00; color: #00ff00; }
+    .tab-help-btn:hover { border-color: rgba(var(--primary-rgb), 0.8); color: rgba(var(--primary-rgb), 0.8); }
+    .tab-btn.active .tab-help-btn { border-color: rgba(var(--primary-rgb), 0.6); color: rgba(var(--primary-rgb), 0.6); }
+    .tab-btn.active .tab-help-btn:hover { border-color: var(--primary); color: var(--primary); }
 
     .help-overlay {
       display: none;
@@ -288,10 +326,10 @@
     .help-overlay.show { display: flex; }
 
     .help-modal {
-      background: #0a0a0a;
-      border: 1px solid #1a5a1a;
+      background: var(--bg);
+      border: 1px solid var(--border-accent-hi);
       border-radius: 8px;
-      box-shadow: 0 0 40px rgba(0,255,0,0.12);
+      box-shadow: 0 0 40px rgba(var(--primary-rgb), 0.12);
       max-width: 680px;
       width: calc(100% - 40px);
       max-height: 88vh;
@@ -302,31 +340,31 @@
     }
 
     .help-modal-title {
-      color: #00ff00;
+      color: var(--primary);
       font-size: 1em;
       letter-spacing: 2px;
       margin-bottom: 18px;
       padding-bottom: 10px;
-      border-bottom: 1px solid #1a3a1a;
+      border-bottom: 1px solid var(--border-accent);
     }
 
     .help-close {
       position: absolute;
       top: 14px; right: 16px;
       background: transparent;
-      border: 1px solid #1a3a1a;
+      border: 1px solid var(--border-accent);
       border-radius: 3px;
-      color: #555;
+      color: var(--text-dim);
       cursor: pointer;
       font-family: inherit;
       font-size: 0.8em;
       padding: 2px 10px;
     }
-    .help-close:hover { border-color: #00cc00; color: #00cc00; }
+    .help-close:hover { border-color: rgba(var(--primary-rgb), 0.8); color: rgba(var(--primary-rgb), 0.8); }
 
     .help-diagram-wrap {
       background: #030a03;
-      border: 1px solid #0d2a0d;
+      border: 1px solid var(--border-accent);
       border-radius: 6px;
       padding: 16px;
       margin-bottom: 18px;
@@ -346,33 +384,33 @@
     }
 
     .help-step-num {
-      color: #00cc00;
+      color: rgba(var(--primary-rgb), 0.8);
       font-size: 0.82em;
       min-width: 22px;
       padding-top: 1px;
     }
 
     .help-step-text {
-      color: #888;
+      color: var(--text-dim);
       font-size: 0.82em;
       line-height: 1.5;
     }
 
-    .help-step-text strong { color: #c0ffc0; }
+    .help-step-text strong { color: var(--text); }
 
     .help-note {
-      color: #444;
+      color: var(--text-dim);
       font-size: 0.76em;
-      border-top: 1px solid #0d2a0d;
+      border-top: 1px solid var(--border-accent);
       padding-top: 12px;
       line-height: 1.6;
     }
 
-    .help-note span { color: #00aa00; }
+    .help-note span { color: rgba(var(--primary-rgb), 0.6); }
 
     .help-section-divider {
       border: none;
-      border-top: 1px solid #1a3a1a;
+      border-top: 1px solid var(--border-accent);
       margin: 22px 0 18px;
     }
 
@@ -384,7 +422,7 @@
     }
 
     .help-step-text .gold { color: #ffcc44; }
-    .help-step-text .dim  { color: #666; }
+    .help-step-text .dim  { color: var(--text-dim); }
 
     /* ── LOTL TAB ── */
     .lotl-os-filter {
@@ -395,10 +433,10 @@
     }
 
     .lotl-os-btn {
-      background: #0a0a0a;
-      border: 1px solid #1a3a1a;
+      background: var(--bg);
+      border: 1px solid var(--border-accent);
       border-radius: 20px;
-      color: #555;
+      color: var(--text-dim);
       cursor: pointer;
       font-family: inherit;
       font-size: 0.78em;
@@ -407,8 +445,8 @@
       transition: all 0.15s;
     }
 
-    .lotl-os-btn:hover { border-color: #2a5a2a; color: #aaa; }
-    .lotl-os-btn.active { background: #0d1a0d; border-color: #1a5a1a; color: #00ff00; }
+    .lotl-os-btn:hover { border-color: var(--border-accent-hi); color: var(--text-dim); }
+    .lotl-os-btn.active { background: var(--surface-accent); border-color: var(--border-accent-hi); color: var(--primary); }
 
     .lotl-section { margin-bottom: 20px; }
 
@@ -418,7 +456,7 @@
       gap: 10px;
       margin-bottom: 10px;
       padding-bottom: 6px;
-      border-bottom: 1px solid #1a3a1a;
+      border-bottom: 1px solid var(--border-accent);
     }
 
     .lotl-os-badge {
@@ -435,22 +473,22 @@
     .lotl-os-badge.windows { color: #a060f0; border-color: #4a1070; background: #140020; }
 
     .lotl-section-title {
-      color: #00cc00;
+      color: rgba(var(--primary-rgb), 0.8);
       font-size: 0.92em;
       font-weight: bold;
       letter-spacing: 1px;
     }
 
     .lotl-item {
-      background: #060f06;
-      border: 1px solid #1a3a1a;
+      background: var(--surface-accent);
+      border: 1px solid var(--border-accent);
       border-radius: 4px;
       margin-bottom: 6px;
       overflow: hidden;
       transition: border-color 0.2s;
     }
 
-    .lotl-item:hover { border-color: #2a5a2a; }
+    .lotl-item:hover { border-color: var(--border-accent-hi); }
 
     .lotl-item-header {
       display: flex;
@@ -462,7 +500,7 @@
     }
 
     .lotl-item-label {
-      color: #888;
+      color: var(--text-dim);
       font-size: 0.82em;
       flex: 1;
     }
@@ -475,12 +513,12 @@
     .lotl-item-body.open { display: block; }
 
     .lotl-note {
-      color: #444;
+      color: var(--text-dim);
       font-size: 0.75em;
       letter-spacing: 0.5px;
       margin-top: 10px;
       padding-top: 8px;
-      border-top: 1px solid #0d2a0d;
+      border-top: 1px solid var(--border-accent);
       font-style: italic;
     }
 
@@ -499,10 +537,10 @@
     }
 
     .filter-chip {
-      background: #0a0a0a;
-      border: 1px solid #1a3a1a;
+      background: var(--bg);
+      border: 1px solid var(--border-accent);
       border-radius: 20px;
-      color: #555;
+      color: var(--text-dim);
       cursor: pointer;
       font-family: inherit;
       font-size: 0.72em;
@@ -512,7 +550,7 @@
       user-select: none;
     }
 
-    .filter-chip:hover { border-color: #2a5a2a; color: #aaa; }
+    .filter-chip:hover { border-color: var(--border-accent-hi); color: var(--text-dim); }
 
     .filter-chip.active-linux   { background: #1a1600; border-color: #5a4a10; color: #f0c060; }
     .filter-chip.active-mac     { background: #001620; border-color: #105a70; color: #60c0f0; }
@@ -562,10 +600,10 @@
     }
 
     .obf-mode-chip {
-      background: #0a0a0a;
+      background: var(--bg);
       border: 1px solid #1a2a00;
       border-radius: 12px;
-      color: #444;
+      color: var(--text-dim);
       cursor: pointer;
       font-family: inherit;
       font-size: 0.68em;
@@ -582,7 +620,7 @@
     }
 
     /* ── SYNTAX HIGHLIGHTING ── */
-    .sh-cmd     { color: #00ff88; font-weight: bold; }
+    .sh-cmd     { color: var(--primary); font-weight: bold; }
     .sh-flag    { color: #79b8ff; }
     .sh-string  { color: #f0a070; }
     .sh-var     { color: #e0c060; }
@@ -590,14 +628,14 @@
     .sh-num     { color: #b0a0ff; }
     .sh-path    { color: #66ccaa; }
     .sh-op      { color: #ff6680; }
-    .sh-comment { color: #444; font-style: italic; }
+    .sh-comment { color: var(--text-dim); font-style: italic; }
 
     /* ── UPGRADE SECTION ── */
-    .upgrade-section h3 { color: #00cc00; font-size: 0.9em; letter-spacing: 1px; margin-bottom: 10px; margin-top: 16px; }
+    .upgrade-section h3 { color: rgba(var(--primary-rgb), 0.8); font-size: 0.9em; letter-spacing: 1px; margin-bottom: 10px; margin-top: 16px; }
     .upgrade-section h3:first-child { margin-top: 0; }
     .upgrade-cmd {
-      background: #030803;
-      border: 1px solid #0d2a0d;
+      background: var(--surface-accent);
+      border: 1px solid var(--border-accent);
       border-radius: 3px;
       padding: 8px 12px;
       margin-bottom: 6px;
@@ -606,31 +644,31 @@
       align-items: flex-start;
       gap: 10px;
     }
-    .upgrade-cmd code { color: #a0f0a0; font-size: 0.83em; word-break: break-all; flex: 1; }
-    .upgrade-note { color: #555; font-size: 0.75em; margin-bottom: 12px; }
+    .upgrade-cmd code { color: var(--text); font-size: 0.83em; word-break: break-all; flex: 1; }
+    .upgrade-note { color: var(--text-dim); font-size: 0.75em; margin-bottom: 12px; }
 
     /* ── FOOTER ── */
     .footer { text-align: center; margin-top: 20px; color: #222; font-size: 0.78em; letter-spacing: 2px; }
-    .footer a { color: #2a5a2a; text-decoration: none; }
-    .footer a:hover { color: #00cc00; }
+    .footer a { color: var(--border-accent-hi); text-decoration: none; }
+    .footer a:hover { color: rgba(var(--primary-rgb), 0.8); }
 
     /* ── TOAST ── */
     #toast {
       position: fixed; bottom: 24px; right: 24px;
-      background: #001a00; border: 1px solid #00cc00; border-radius: 4px;
-      color: #00ff00; font-size: 0.82em; letter-spacing: 1px;
+      background: #001a00; border: 1px solid rgba(var(--primary-rgb), 0.8); border-radius: 4px;
+      color: var(--primary); font-size: 0.82em; letter-spacing: 1px;
       padding: 8px 16px; opacity: 0; pointer-events: none;
       transition: opacity 0.2s; z-index: 999;
     }
 
     #toast.show { opacity: 1; }
 
-    .no-results { color: #444; font-size: 0.85em; padding: 20px; text-align: center; }
+    .no-results { color: var(--text-dim); font-size: 0.85em; padding: 20px; text-align: center; }
 
     /* ── DIAGRAM ── */
     .shell-diagram {
       margin-top: 10px;
-      border-top: 1px solid #0d2a0d;
+      border-top: 1px solid var(--border-accent);
       padding-top: 10px;
     }
     .shell-diagram svg { width: 100%; max-width: 520px; height: auto; display: block; }
@@ -687,12 +725,12 @@
     /* ── SETUP GUIDE ── */
     .setup-guide {
       margin-top: 10px;
-      border-top: 1px solid #0d2a0d;
+      border-top: 1px solid var(--border-accent);
       padding-top: 10px;
     }
 
     .setup-label {
-      color: #555;
+      color: var(--text-dim);
       font-size: 0.75em;
       letter-spacing: 1px;
       margin-bottom: 6px;
@@ -717,7 +755,7 @@
     .setup-step-inner { flex: 1; }
 
     .setup-step-title {
-      color: #888;
+      color: var(--text-dim);
       font-size: 0.72em;
       letter-spacing: 0.5px;
       margin-bottom: 3px;
@@ -743,8 +781,8 @@
 
     /* ── TOOLS TAB ── */
     .tool-card {
-      background: #060f06;
-      border: 1px solid #1a3a1a;
+      background: var(--surface-accent);
+      border: 1px solid var(--border-accent);
       border-radius: 4px;
       margin-bottom: 10px;
       overflow: hidden;
@@ -761,22 +799,22 @@
 
     .tool-card-header:hover { background: #0a1a0a; }
 
-    .tool-name { color: #00cc00; font-size: 0.92em; font-weight: bold; }
-    .tool-desc { color: #555; font-size: 0.78em; flex: 1; padding-left: 12px; }
+    .tool-name { color: rgba(var(--primary-rgb), 0.8); font-size: 0.92em; font-weight: bold; }
+    .tool-desc { color: var(--text-dim); font-size: 0.78em; flex: 1; padding-left: 12px; }
 
     .tool-body { display: none; padding: 0 14px 14px; }
     .tool-body.open { display: block; }
 
     .tool-section-title {
-      color: #666;
+      color: var(--text-dim);
       font-size: 0.75em;
       letter-spacing: 1px;
       margin: 10px 0 4px;
     }
 
     .tool-cmd {
-      background: #030803;
-      border: 1px solid #0d2a0d;
+      background: var(--surface-accent);
+      border: 1px solid var(--border-accent);
       border-radius: 3px;
       padding: 8px 12px;
       margin-bottom: 5px;
@@ -786,7 +824,7 @@
       gap: 10px;
     }
 
-    .tool-cmd code { color: #a0f0a0; font-size: 0.83em; flex: 1; white-space: pre-wrap; word-break: break-all; }
+    .tool-cmd code { color: var(--text); font-size: 0.83em; flex: 1; white-space: pre-wrap; word-break: break-all; }
     .tool-cmd-note { color: #d0a060; font-size: 0.83em; flex: 1; white-space: pre-wrap; word-break: break-all; }
 
     .badge-tool      { color: #00cccc; border-color: #104040; background: #001414; }
@@ -804,6 +842,37 @@
       background: linear-gradient(90deg, #0d0d06 0%, #0a0a04 100%);
     }
   </style>
+  <script>
+  // Adopt the operator's accent colour (chosen in the main UI Settings) so this
+  // tool matches instead of staying default-green. Served under
+  // /tools/raccshells, same origin as the console: we read the same localStorage
+  // pref it writes and live-update when it changes (savePrefs -> storage event).
+  // No pref -> keep the brand green. Byte-for-byte the adopter the console's
+  // five embedded pages carry, on purpose: uniformity is the interface.
+  (function () {
+      var PREFS_KEY = 'raccden-prefs';
+      function applyAccent() {
+          var accent;
+          try {
+              var s = JSON.parse(localStorage.getItem(PREFS_KEY) || '{}');
+              if (typeof s.accent === 'string' && /^#[0-9a-f]{6}$/i.test(s.accent)) accent = s.accent;
+          } catch (e) { return; }
+          if (!accent) return;
+          var m = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(accent);
+          var root = document.documentElement.style;
+          root.setProperty('--primary', accent);
+          root.setProperty('--success', accent);
+          if (m) {
+              root.setProperty('--primary-rgb',
+                  parseInt(m[1], 16) + ', ' + parseInt(m[2], 16) + ', ' + parseInt(m[3], 16));
+          }
+      }
+      applyAccent();
+      window.addEventListener('storage', function (e) {
+          if (e.key === PREFS_KEY) applyAccent();
+      });
+  })();
+  </script>
 </head>
 <body>
 <div class="container">
@@ -870,7 +939,7 @@
     <input type="text" id="search" placeholder="&#47; search shells..." oninput="render()" />
   </div>
   <div class="filter-row">
-    <span style="color:#333;font-size:0.72em;align-self:center;letter-spacing:1px">FILTER:</span>
+    <span style="color:var(--text-dim);font-size:0.72em;align-self:center;letter-spacing:1px">FILTER:</span>
     <button class="filter-chip" data-filter="linux"   onclick="toggleFilter(this)">&#9670; linux</button>
     <button class="filter-chip" data-filter="mac"     onclick="toggleFilter(this)">&#9670; mac</button>
     <button class="filter-chip" data-filter="windows" onclick="toggleFilter(this)">&#9670; windows</button>
